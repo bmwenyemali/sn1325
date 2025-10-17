@@ -9,44 +9,60 @@
   --rouge-rdc: #ce1126;
 }
 
-/* Classes utilitaires forcées pour les couleurs RDC */
-.bg-bleu-rdc {
-  background-color: #002b7f !important;
-}
+/* Styles de composants personnalisés */
+@layer components {
+  .btn-primary {
+    background-color: #002b7f;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
 
-.bg-jaune-rdc {
-  background-color: #fcd116 !important;
-}
+  .btn-primary:hover {
+    background-color: #001f5c;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
 
-.bg-rouge-rdc {
-  background-color: #ce1126 !important;
-}
+  .btn-secondary {
+    background-color: #fcd116;
+    color: #002b7f;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
 
-.text-bleu-rdc {
-  color: #002b7f !important;
-}
+  .btn-secondary:hover {
+    background-color: #e5bc00;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
 
-.text-jaune-rdc {
-  color: #fcd116 !important;
-}
+  .container-rdc {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 
-.text-rouge-rdc {
-  color: #ce1126 !important;
-}
+  @media (min-width: 640px) {
+    .container-rdc {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
 
-.border-bleu-rdc {
-  border-color: #002b7f !important;
-}
-
-.border-jaune-rdc {
-  border-color: #fcd116 !important;
-}
-
-.border-rouge-rdc {
-  border-color: #ce1126 !important;
-}
-
-/* Styles de base */
+  @media (min-width: 1024px) {
+    .container-rdc {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+} /* Styles de base */
 body {
   background-color: #f9fafb;
   color: #111827;

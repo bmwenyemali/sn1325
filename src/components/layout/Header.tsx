@@ -56,7 +56,7 @@ export function Header() {
               <Users className="w-4 h-4" />
               <span>Axes Stratégiques</span>
             </Link>
-            <Link href="#login" className="btn-primary">
+            <Link href="/auth/signin" className="btn-primary">
               Se connecter
             </Link>
           </nav>
@@ -106,7 +106,7 @@ export function Header() {
               </Link>
               <div className="px-4">
                 <Link
-                  href="#login"
+                  href="/auth/signin"
                   className="btn-primary block text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
