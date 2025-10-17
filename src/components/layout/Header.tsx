@@ -14,7 +14,7 @@ export function Header() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <header className="bg-white shadow-lg border-b-4 border-bleu-rdc sticky top-0 z-50">
+    <header className="bg-white dark:bg-slate-900 shadow-lg border-b-4 border-bleu-rdc sticky top-0 z-50 transition-colors">
       <div className="container-rdc">
         <div className="flex items-center justify-between h-16">
           {/* Logo et titre */}
@@ -28,8 +28,10 @@ export function Header() {
                 className="object-contain"
               />
               <div>
-                <h1 className="text-xl font-bold text-bleu-rdc">SN1325</h1>
-                <p className="text-xs text-gray-600">
+                <h1 className="text-xl font-bold text-bleu-rdc dark:text-jaune-rdc">
+                  SN1325
+                </h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   République Démocratique du Congo
                 </p>
               </div>
@@ -40,7 +42,7 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-6">
             <Link
               href="/about"
-              className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+              className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
             >
               <FileText className="w-4 h-4" />
               <span>À propos</span>
@@ -48,22 +50,22 @@ export function Header() {
             {session && (
               <>
                 <Link
-                  href="#stats"
-                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                  href="/dashboard/rapports/statistiques"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>Statistiques</span>
                 </Link>
                 <Link
-                  href="#axes"
-                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                  href="/dashboard/referentiel/axes"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
                 >
                   <Users className="w-4 h-4" />
                   <span>Axes Stratégiques</span>
                 </Link>
                 <Link
                   href="/structures"
-                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
                 >
                   <Users className="w-4 h-4" />
                   <span>Structures</span>
@@ -86,7 +88,7 @@ export function Header() {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="p-2 rounded-md text-gray-700 hover:text-bleu-rdc hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-bleu-rdc"
+              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-bleu-rdc"
             >
               {isMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -99,11 +101,11 @@ export function Header() {
 
         {/* Menu mobile étendu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 animate-fade-in">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 animate-fade-in">
             <nav className="flex flex-col space-y-4">
               <Link
                 href="/about"
-                className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <FileText className="w-4 h-4" />
@@ -112,16 +114,16 @@ export function Header() {
               {session && (
                 <>
                   <Link
-                    href="#stats"
-                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    href="/dashboard/rapports/statistiques"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <BarChart3 className="w-4 h-4" />
                     <span>Statistiques</span>
                   </Link>
                   <Link
-                    href="#axes"
-                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    href="/dashboard/referentiel/axes"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Users className="w-4 h-4" />
@@ -129,7 +131,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/structures"
-                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Users className="w-4 h-4" />

@@ -158,6 +158,19 @@ export async function initializeRealData() {
     });
     console.log("✅ Rôle Admin créé");
 
+    // Créer le rôle Consultant
+    const consultantRole = await Role.create({
+      nom: "Consultant",
+      code: "CONSULTANT",
+      description: "Consultant avec accès en lecture et saisie de données",
+      niveau: 3,
+      privileges: privileges
+        .filter((p) => ["READ", "WRITE"].includes(p.code))
+        .map((p) => p._id),
+      active: true,
+    });
+    console.log("✅ Rôle Consultant créé");
+
     // Créer l'utilisateur administrateur par défaut
     const adminUser = await User.create({
       nom: "Admin",
@@ -172,6 +185,23 @@ export async function initializeRealData() {
       statut: "actif",
     });
     console.log("✅ Utilisateur admin créé:", adminUser.email);
+
+    // Créer l'utilisateur consultant par défaut
+    const consultantUser = await User.create({
+      nom: "Mukendi",
+      prenom: "Consultant",
+      email: "consultant@sn1325.cd",
+      password: "consult123",
+      role: consultantRole._id,
+      privileges: privileges
+        .filter((p) => ["READ", "WRITE"].includes(p.code))
+        .map((p) => p._id),
+      province: provinces.find((p) => p.nom === "Nord-Kivu")?._id,
+      fonction: "Consultant Technique",
+      organisation: "ONU Femmes",
+      statut: "actif",
+    });
+    console.log("✅ Utilisateur consultant créé:", consultantUser.email);
 
     // 4. Injecter quelques données réelles basées sur les rapports 2022 et 2025
     const participationAxe = axes.find((a) => a.nom === "Participation");
@@ -300,18 +330,18 @@ export async function initializeRealData() {
     console.log("📊 Résumé:");
     console.log(`   - ${axes.length} axes stratégiques`);
     console.log(`   - ${provinces.length} provinces`);
-    console.log(`   - 1 utilisateur admin`);
+    console.log(`   - 2 utilisateurs (admin + consultant)`);
     console.log(`   - ${sampleData.length} entrées de données`);
-    console.log("\n🔑 Connexion admin:");
-    console.log("   Email: admin@sn1325.cd");
-    console.log("   Mot de passe: admin123");
+    console.log("\n🔑 Comptes de connexion:");
+    console.log("   Admin: admin@sn1325.cd / admin123");
+    console.log("   Consultant: consultant@sn1325.cd / consult123");
 
     return {
       success: true,
       summary: {
         axes: axes.length,
         provinces: provinces.length,
-        users: 1,
+        users: 2,
         dataEntries: sampleData.length,
       },
     };
