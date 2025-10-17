@@ -30,7 +30,7 @@ export default function SignInPage() {
       } else {
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch {
       setError("Une erreur est survenue lors de la connexion");
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-bleu-rdc hover:bg-bleu-rdc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-rdc disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>

@@ -186,6 +186,37 @@ UserSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Hash password when using findOneAndUpdate/upsert if a plain password is provided
+UserSchema.pre("findOneAndUpdate", async function (next) {
+  type UpdateDoc = {
+    password?: unknown;
+    $set?: { password?: unknown; [k: string]: unknown };
+    [k: string]: unknown;
+  };
+
+  const rawUpdate = this.getUpdate() as UpdateDoc | undefined;
+  const update: UpdateDoc = rawUpdate ?? {};
+  // Support both direct set and $set
+  const directPwd = update.password;
+  const setPwd = update.$set?.password;
+  const pwd =
+    typeof directPwd === "string"
+      ? directPwd
+      : typeof setPwd === "string"
+      ? (setPwd as string)
+      : undefined;
+
+  if (typeof pwd === "string" && pwd.length > 0 && !pwd.startsWith("$2")) {
+    const hashed = await bcrypt.hash(pwd, 12);
+    if (update.$set) {
+      update.$set.password = hashed;
+    } else {
+      update.password = hashed;
+    }
+  }
+  next();
+});
+
 // Méthode pour obtenir les infos publiques de l'utilisateur
 UserSchema.methods.toPublicJSON = function () {
   return {

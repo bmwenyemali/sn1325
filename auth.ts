@@ -26,7 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         await dbConnect();
 
-        const user = await User.findOne({ email: credentials.email });
+        const email = String(credentials.email).toLowerCase();
+        const user = await User.findOne({ email });
 
         if (!user) {
           return null;
@@ -81,9 +82,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        const userExt = session.user as { id?: string; role?: string };
-        userExt.id = String(token.id ?? "");
-        userExt.role = String(token.role ?? "");
+        const userExt = session.user as unknown as {
+          id?: string;
+          role?: string;
+        };
+        userExt.id = String((token as unknown as { id?: unknown }).id ?? "");
+        userExt.role = String(
+          (token as unknown as { role?: unknown }).role ?? ""
+        );
       }
       return session;
     },

@@ -1,6 +1,7 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BarChart, Users, Shield, CheckCircle } from "lucide-react";
-import Link from "next/link";
+import CtaLink from "@/components/home/CtaLink";
 
 export default function HomePage() {
   return (
@@ -16,12 +17,7 @@ export default function HomePage() {
           Femmes, la Paix et la Sécurité en République Démocratique du Congo.
         </p>
         <div className="mt-8">
-          <Link
-            href="/dashboard"
-            className="bg-jaune-rdc text-bleu-rdc font-bold py-3 px-8 rounded-full text-lg hover:bg-yellow-400 transition-transform transform hover:scale-105"
-          >
-            Accéder au Tableau de Bord
-          </Link>
+          <CtaLink />
         </div>
       </section>
 
@@ -62,12 +58,13 @@ export default function HomePage() {
         </h2>
         <p className="text-gray-700 leading-relaxed">
           La résolution 1325, adoptée en 2000 par le Conseil de sécurité de
-          l'ONU, est un cadre juridique et politique historique. Elle reconnaît
-          l'impact disproportionné des conflits armés sur les femmes et les
-          filles et souligne leur rôle essentiel dans la prévention des
-          conflits, la consolidation de la paix et la reconstruction. La RDC
-          s'est engagée, à travers son Plan d'Action National, à mettre en œuvre
-          cette résolution sur l'ensemble de son territoire.
+          l&apos;ONU, est un cadre juridique et politique historique. Elle
+          reconnaît l&apos;impact disproportionné des conflits armés sur les
+          femmes et les filles et souligne leur rôle essentiel dans la
+          prévention des conflits, la consolidation de la paix et la
+          reconstruction. La RDC s&apos;est engagée, à travers son Plan
+          d&apos;Action National, à mettre en œuvre cette résolution sur
+          l&apos;ensemble de son territoire.
         </p>
       </section>
     </div>

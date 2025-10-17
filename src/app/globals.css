@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Variables CSS personnalisées pour SN1325 RDC */
 :root {
@@ -12,33 +10,49 @@
 /* Styles de composants personnalisés */
 @layer components {
   .btn-primary {
-    background-color: #002b7f;
-    color: white;
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: #002b7f; /* bleu-rdc */
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 6px 14px rgba(0, 43, 127, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .btn-primary:hover {
-    background-color: #001f5c;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background-color: #001f5c; /* bleu-rdc-600 */
+    box-shadow: 0 10px 22px rgba(0, 31, 92, 0.28);
+    transform: translateY(-1px);
+  }
+  .btn-primary:focus-visible {
+    outline: 3px solid #fcd116; /* jaune-rdc for high-contrast focus */
+    outline-offset: 2px;
+  }
+  .dark .btn-primary {
+    box-shadow: 0 6px 14px rgba(252, 209, 22, 0.15);
+    border-color: rgba(252, 209, 22, 0.25);
   }
 
   .btn-secondary {
-    background-color: #fcd116;
+    background-color: #fcd116; /* jaune-rdc */
     color: #002b7f;
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 6px 14px rgba(252, 209, 22, 0.25);
+    border: 1px solid rgba(0, 43, 127, 0.15);
   }
 
   .btn-secondary:hover {
-    background-color: #e5bc00;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background-color: #e5bc00; /* jaune-rdc-600 */
+    box-shadow: 0 10px 22px rgba(229, 188, 0, 0.28);
+    transform: translateY(-1px);
+  }
+  .btn-secondary:focus-visible {
+    outline: 3px solid #002b7f; /* bleu-rdc */
+    outline-offset: 2px;
   }
 
   .container-rdc {

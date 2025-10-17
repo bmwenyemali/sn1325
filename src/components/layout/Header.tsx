@@ -4,9 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Users, BarChart3, FileText } from "lucide-react";
+import { useSession } from "next-auth/react";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -34,31 +37,49 @@ export function Header() {
           </div>
 
           {/* Navigation desktop */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6">
             <Link
-              href="#about"
-              className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors"
+              href="/about"
+              className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
             >
               <FileText className="w-4 h-4" />
               <span>À propos</span>
             </Link>
-            <Link
-              href="#stats"
-              className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors"
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Statistiques</span>
-            </Link>
-            <Link
-              href="#axes"
-              className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors"
-            >
-              <Users className="w-4 h-4" />
-              <span>Axes Stratégiques</span>
-            </Link>
-            <Link href="/auth/signin" className="btn-primary">
-              Se connecter
-            </Link>
+            {session && (
+              <>
+                <Link
+                  href="#stats"
+                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Statistiques</span>
+                </Link>
+                <Link
+                  href="#axes"
+                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Axes Stratégiques</span>
+                </Link>
+                <Link
+                  href="/structures"
+                  className="flex items-center space-x-2 text-gray-800 dark:text-gray-100 hover:text-bleu-rdc transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Structures</span>
+                </Link>
+              </>
+            )}
+            <ThemeToggle />
+            {!session ? (
+              <Link href="/auth/signin" className="btn-primary">
+                Se connecter
+              </Link>
+            ) : (
+              <Link href="/dashboard" className="btn-primary">
+                Tableau de Bord
+              </Link>
+            )}
           </nav>
 
           {/* Menu mobile */}
@@ -81,37 +102,60 @@ export function Header() {
           <div className="md:hidden border-t border-gray-200 py-4 animate-fade-in">
             <nav className="flex flex-col space-y-4">
               <Link
-                href="#about"
+                href="/about"
                 className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <FileText className="w-4 h-4" />
                 <span>À propos</span>
               </Link>
-              <Link
-                href="#stats"
-                className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Statistiques</span>
-              </Link>
-              <Link
-                href="#axes"
-                className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Users className="w-4 h-4" />
-                <span>Axes Stratégiques</span>
-              </Link>
-              <div className="px-4">
-                <Link
-                  href="/auth/signin"
-                  className="btn-primary block text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Se connecter
-                </Link>
+              {session && (
+                <>
+                  <Link
+                    href="#stats"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Statistiques</span>
+                  </Link>
+                  <Link
+                    href="#axes"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Axes Stratégiques</span>
+                  </Link>
+                  <Link
+                    href="/structures"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-bleu-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Structures</span>
+                  </Link>
+                </>
+              )}
+              <div className="px-4 flex items-center gap-3">
+                <ThemeToggle />
+                {!session ? (
+                  <Link
+                    href="/auth/signin"
+                    className="btn-primary block text-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Se connecter
+                  </Link>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    className="btn-primary block text-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Tableau de Bord
+                  </Link>
+                )}
               </div>
             </nav>
           </div>

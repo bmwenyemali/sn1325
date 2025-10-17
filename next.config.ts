@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Use a custom distDir to avoid Windows file locking issues on .next
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
 };
 
 export default nextConfig;

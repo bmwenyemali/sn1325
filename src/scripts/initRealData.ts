@@ -2,7 +2,6 @@ import connectDB from "../lib/mongodb";
 import { Axe, Province } from "../models/Referentiel";
 import { User, Role, Privilege } from "../models/User";
 import { SimpleData } from "../models/SimpleData";
-import bcrypt from "bcryptjs";
 
 export async function initializeRealData() {
   try {
@@ -160,12 +159,11 @@ export async function initializeRealData() {
     console.log("✅ Rôle Admin créé");
 
     // Créer l'utilisateur administrateur par défaut
-    const hashedPassword = await bcrypt.hash("admin123", 10);
     const adminUser = await User.create({
       nom: "Admin",
       prenom: "Système",
       email: "admin@sn1325.cd",
-      password: hashedPassword,
+      password: "admin123",
       role: adminRole._id,
       privileges: privileges.map((p) => p._id),
       province: provinces.find((p) => p.nom === "Kinshasa")?._id,
