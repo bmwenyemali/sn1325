@@ -169,12 +169,32 @@ body {
 }
 
 /* Dark mode specific improvements */
+.dark {
+  color-scheme: dark;
+}
+
 .dark .bg-white {
   background-color: #1e293b !important;
 }
 
+.dark .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #334155 !important;
+}
+
 .dark .text-gray-900 {
   color: #f1f5f9 !important;
+}
+
+.dark .text-gray-800 {
+  color: #e2e8f0 !important;
 }
 
 .dark .text-gray-700 {
@@ -186,6 +206,10 @@ body {
 }
 
 .dark .text-gray-500 {
+  color: #64748b !important;
+}
+
+.dark .text-gray-400 {
   color: #64748b !important;
 }
 
@@ -203,6 +227,18 @@ body {
 
 .dark .shadow-sm {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #334155 !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #475569 !important;
 }
 
 /* Styles pour les impressions */
