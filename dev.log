@@ -1,0 +1,214 @@
+
+> sn1325-app@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.6
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.2.11:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.3s
+ ○ Compiling / ...
+ ✓ Compiled / in 3.6s (720 modules)
+ GET / 200 in 5216ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 1885ms (877 modules)
+ GET / 200 in 1970ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 6159ms
+ GET /api/auth/session 500 in 2592ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 200ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 138ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 106ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 149ms
+[TypeError: Function.prototype.apply was called on #<Object>, which is an object and not a function]
+ GET /api/auth/session 500 in 125ms
+ ✓ Compiled in 1016ms (721 modules)
+ GET / 200 in 930ms
+ ✓ Compiled in 165ms (274 modules)
+ GET / 200 in 119ms
+ ✓ Compiled /api/auth/[...nextauth] in 250ms (604 modules)
+ GET /api/auth/session 200 in 587ms
+ GET / 200 in 586ms
+ GET /api/auth/session 200 in 31ms
+ ○ Compiling /api/init ...
+ ✓ Compiled /api/init in 813ms (871 modules)
+🚀 Début de l'initialisation avec données réelles...
+🔌 Connexion à MongoDB établie
+🗑️ Données existantes supprimées
+❌ Erreur lors de l'initialisation: Error: Axe validation failed: code: Path `code` is required.
+    at initializeRealData (src\scripts\initRealData.ts:271:13)
+    at async POST (src\app\api\init\route.ts:8:20)
+  269 |     };
+  270 |   } catch (error) {
+> 271 |     console.error("❌ Erreur lors de l'initialisation:", error);
+      |             ^
+  272 |     throw error;
+  273 |   }
+  274 | } {
+  errors: [Object],
+  _message: 'Axe validation failed'
+}
+❌ Erreur lors de l'initialisation: Error: Axe validation failed: code: Path `code` is required.
+    at POST (src\app\api\init\route.ts:16:13)
+  14 |     });
+  15 |   } catch (error) {
+> 16 |     console.error("❌ Erreur lors de l'initialisation:", error);
+     |             ^
+  17 |
+  18 |     return NextResponse.json(
+  19 |       { {
+  errors: [Object],
+  _message: 'Axe validation failed'
+}
+ POST /api/init 500 in 7593ms
+ ✓ Compiled in 651ms (749 modules)
+ GET / 200 in 503ms
+ ✓ Compiled in 411ms (749 modules)
+ GET / 200 in 315ms
+🚀 Début de l'initialisation avec données réelles...
+🔌 Connexion à MongoDB établie
+🗑️ Données existantes supprimées
+✅ Axes stratégiques créés: 5
+✅ Provinces créées: 26
+❌ Erreur lors de l'initialisation: Error: User validation failed: role: Cast to ObjectId failed for value "Admin" (type string) at path "role" because of "BSONError", privileges.0: Cast to [ObjectId] failed for value "[ 'lecture', 'ecriture', 'suppression', 'administration' ]" (type string) at path "privileges.0" because of "CastError"
+    at initializeRealData (src\scripts\initRealData.ts:276:13)
+    at async POST (src\app\api\init\route.ts:8:20)
+  274 |     };
+  275 |   } catch (error) {
+> 276 |     console.error("❌ Erreur lors de l'initialisation:", error);
+      |             ^
+  277 |     throw error;
+  278 |   }
+  279 | } {
+  errors: [Object],
+  _message: 'User validation failed'
+}
+❌ Erreur lors de l'initialisation: Error: User validation failed: role: Cast to ObjectId failed for value "Admin" (type string) at path "role" because of "BSONError", privileges.0: Cast to [ObjectId] failed for value "[ 'lecture', 'ecriture', 'suppression', 'administration' ]" (type string) at path "privileges.0" because of "CastError"
+    at POST (src\app\api\init\route.ts:16:13)
+  14 |     });
+  15 |   } catch (error) {
+> 16 |     console.error("❌ Erreur lors de l'initialisation:", error);
+     |             ^
+  17 |
+  18 |     return NextResponse.json(
+  19 |       { {
+  errors: [Object],
+  _message: 'User validation failed'
+}
+ POST /api/init 500 in 2096ms
+🚀 Début de l'initialisation avec données réelles...
+🔌 Connexion à MongoDB établie
+🗑️ Données existantes supprimées
+✅ Axes stratégiques créés: 5
+✅ Provinces créées: 26
+❌ Erreur lors de l'initialisation: Error: User validation failed: role: Cast to ObjectId failed for value "Admin" (type string) at path "role" because of "BSONError", privileges.0: Cast to [ObjectId] failed for value "[ 'lecture', 'ecriture', 'suppression', 'administration' ]" (type string) at path "privileges.0" because of "CastError"
+    at initializeRealData (src\scripts\initRealData.ts:276:13)
+    at async POST (src\app\api\init\route.ts:8:20)
+  274 |     };
+  275 |   } catch (error) {
+> 276 |     console.error("❌ Erreur lors de l'initialisation:", error);
+      |             ^
+  277 |     throw error;
+  278 |   }
+  279 | } {
+  errors: [Object],
+  _message: 'User validation failed'
+}
+❌ Erreur lors de l'initialisation: Error: User validation failed: role: Cast to ObjectId failed for value "Admin" (type string) at path "role" because of "BSONError", privileges.0: Cast to [ObjectId] failed for value "[ 'lecture', 'ecriture', 'suppression', 'administration' ]" (type string) at path "privileges.0" because of "CastError"
+    at POST (src\app\api\init\route.ts:16:13)
+  14 |     });
+  15 |   } catch (error) {
+> 16 |     console.error("❌ Erreur lors de l'initialisation:", error);
+     |             ^
+  17 |
+  18 |     return NextResponse.json(
+  19 |       { {
+  errors: [Object],
+  _message: 'User validation failed'
+}
+ POST /api/init 500 in 1907ms
+ ✓ Compiled in 1082ms (749 modules)
+ GET / 200 in 374ms
+ ✓ Compiled in 350ms (749 modules)
+ GET / 200 in 392ms
+ ✓ Compiled in 495ms (749 modules)
+ GET / 200 in 253ms
+ ✓ Compiled in 408ms (721 modules)
+ GET / 200 in 477ms
+ ✓ Compiled in 195ms (274 modules)
+ GET / 200 in 133ms
+ ✓ Compiled in 383ms (274 modules)
+ GET / 200 in 144ms
+ ✓ Compiled in 246ms (274 modules)
+ GET / 200 in 116ms
+ ✓ Compiled in 175ms (274 modules)
+ GET / 200 in 110ms
+ ✓ Compiled /api/init in 356ms (475 modules)
+🚀 Début de l'initialisation avec données réelles...
+🔌 Connexion à MongoDB établie
+ GET / 200 in 529ms
+🗑️ Données existantes supprimées
+✅ Axes stratégiques créés: 5
+✅ Provinces créées: 26
+✅ Privilèges créés: 4
+✅ Rôle Admin créé
+✅ Utilisateur admin créé: admin@sn1325.cd
+✅ Données réelles injectées: 7
+
+🎉 Initialisation complète réussie !
+📊 Résumé:
+   - 5 axes stratégiques
+   - 26 provinces
+   - 1 utilisateur admin
+   - 7 entrées de données
+
+🔑 Connexion admin:
+   Email: admin@sn1325.cd
+   Mot de passe: admin123
+ POST /api/init 200 in 3731ms
+🚀 Début de l'initialisation avec données réelles...
+🔌 Connexion à MongoDB établie
+🗑️ Données existantes supprimées
+✅ Axes stratégiques créés: 5
+✅ Provinces créées: 26
+✅ Privilèges créés: 4
+✅ Rôle Admin créé
+✅ Utilisateur admin créé: admin@sn1325.cd
+✅ Données réelles injectées: 7
+
+🎉 Initialisation complète réussie !
+📊 Résumé:
+   - 5 axes stratégiques
+   - 26 provinces
+   - 1 utilisateur admin
+   - 7 entrées de données
+
+🔑 Connexion admin:
+   Email: admin@sn1325.cd
+   Mot de passe: admin123
+ POST /api/init 200 in 2659ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1232ms (752 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\bienv\Mon Drive\AKILI\PROJECTS 2026\SN1325\sn1325-app\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json',
+  page: '/dashboard'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 4.8s (1092 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\bienv\Mon Drive\AKILI\PROJECTS 2026\SN1325\sn1325-app\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json'
+}
+ GET /dashboard 500 in 8921ms

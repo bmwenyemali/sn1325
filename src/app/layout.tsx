@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 
 const inter = Inter({
@@ -45,15 +47,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" dir="ltr">
+    <html
+      lang="fr"
+      dir="ltr"
+      className={`${inter.variable} ${poppins.variable}`}
+    >
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/LogoSN1325.png" type="image/png" />
       </head>
-      <body
-        className={`${inter.variable} ${poppins.variable} font-sans antialiased bg-gray-50 text-gray-900`}
-      >
-        <SessionProvider>{children}</SessionProvider>
+      <body className="bg-gray-50 font-sans">
+        <SessionProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </SessionProvider>
       </body>
     </html>
   );

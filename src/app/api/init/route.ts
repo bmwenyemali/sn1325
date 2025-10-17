@@ -1,23 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { initializeRealData } from "@/scripts/initRealData";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    // Vérifier un token de sécurité simple pour éviter les initialisations accidentelles
-    const { token } = await request.json();
-
-    if (token !== "init-sn1325-2025") {
-      return NextResponse.json({ error: "Token invalide" }, { status: 401 });
-    }
-
     console.log("🚀 Début de l'initialisation avec données réelles...");
 
     const result = await initializeRealData();
 
     return NextResponse.json({
       success: true,
-      message: "Base de données initialisée avec données réelles",
-      data: result.summary,
+      message: "Base de données initialisée avec données réelles SN1325",
+      data: result,
     });
   } catch (error) {
     console.error("❌ Erreur lors de l'initialisation:", error);

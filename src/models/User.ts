@@ -154,7 +154,9 @@ const AuditLogSchema = new Schema<IAuditLog>(
 );
 
 // Index pour optimiser les requêtes
-UserSchema.index({ email: 1 });
+// Note: `unique: true` is already declared on the `email` field above.
+// Avoid declaring the same index twice to prevent mongoose duplicate-index warnings.
+// UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ province: 1 });
 UserSchema.index({ statut: 1 });

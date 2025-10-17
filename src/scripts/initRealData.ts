@@ -1,7 +1,8 @@
 import connectDB from "../lib/mongodb";
 import { Axe, Province } from "../models/Referentiel";
-import { User } from "../models/User";
+import { User, Role, Privilege } from "../models/User";
 import { SimpleData } from "../models/SimpleData";
+import bcrypt from "bcryptjs";
 
 export async function initializeRealData() {
   try {
@@ -13,6 +14,8 @@ export async function initializeRealData() {
       Axe.deleteMany({}),
       Province.deleteMany({}),
       User.deleteMany({}),
+      Role.deleteMany({}),
+      Privilege.deleteMany({}),
       SimpleData.deleteMany({}),
     ]);
     console.log("🗑️ Données existantes supprimées");
@@ -20,6 +23,7 @@ export async function initializeRealData() {
     // 1. Créer les 5 axes stratégiques
     const axes = await Axe.insertMany([
       {
+        code: "PART",
         nom: "Participation",
         description:
           "Participation accrue des femmes aux processus de prise de décision et aux négociations de paix",
@@ -30,6 +34,7 @@ export async function initializeRealData() {
         dateModification: new Date(),
       },
       {
+        code: "PROT",
         nom: "Protection",
         description:
           "Protection des droits des femmes et des filles en période de conflit et post-conflit",
@@ -40,6 +45,7 @@ export async function initializeRealData() {
         dateModification: new Date(),
       },
       {
+        code: "PREV",
         nom: "Prévention",
         description:
           "Prévention des conflits et des violences basées sur le genre",
@@ -50,6 +56,7 @@ export async function initializeRealData() {
         dateModification: new Date(),
       },
       {
+        code: "RELV",
         nom: "Relèvement",
         description: "Relèvement et reconstruction tenant compte du genre",
         couleur: "#28A745",
@@ -59,6 +66,7 @@ export async function initializeRealData() {
         dateModification: new Date(),
       },
       {
+        code: "COORD",
         nom: "Coordination",
         description: "Coordination et mise en œuvre de la résolution 1325",
         couleur: "#6F42C1",
@@ -106,20 +114,64 @@ export async function initializeRealData() {
     ]);
     console.log("✅ Provinces créées:", provinces.length);
 
-    // 3. Créer un utilisateur administrateur par défaut
+    // 3. Créer rôles et privilèges pour l'admin
+    // Créer tous les privilèges nécessaires
+    const privileges = await Privilege.insertMany([
+      {
+        nom: "Lecture",
+        code: "READ",
+        description: "Lecture des données",
+        module: "all",
+        action: "read",
+      },
+      {
+        nom: "Écriture",
+        code: "WRITE",
+        description: "Création et modification",
+        module: "all",
+        action: "create",
+      },
+      {
+        nom: "Suppression",
+        code: "DELETE",
+        description: "Suppression des données",
+        module: "all",
+        action: "delete",
+      },
+      {
+        nom: "Administration",
+        code: "ADMIN",
+        description: "Administration complète",
+        module: "all",
+        action: "publish",
+      },
+    ]);
+    console.log("✅ Privilèges créés:", privileges.length);
+
+    // Créer le rôle Admin
+    const adminRole = await Role.create({
+      nom: "Administrateur",
+      code: "ADMIN",
+      description: "Administrateur système avec tous les droits",
+      niveau: 1,
+      privileges: privileges.map((p) => p._id),
+      active: true,
+    });
+    console.log("✅ Rôle Admin créé");
+
+    // Créer l'utilisateur administrateur par défaut
+    const hashedPassword = await bcrypt.hash("admin123", 10);
     const adminUser = await User.create({
       nom: "Admin",
       prenom: "Système",
       email: "admin@sn1325.cd",
-      motDePasse: "admin123", // À changer en production
-      role: "Admin",
-      privileges: ["lecture", "ecriture", "suppression", "administration"],
+      password: hashedPassword,
+      role: adminRole._id,
+      privileges: privileges.map((p) => p._id),
       province: provinces.find((p) => p.nom === "Kinshasa")?._id,
       fonction: "Administrateur Système",
       organisation: "Secrétariat National 1325",
       statut: "actif",
-      dateCreation: new Date(),
-      dateModification: new Date(),
     });
     console.log("✅ Utilisateur admin créé:", adminUser.email);
 

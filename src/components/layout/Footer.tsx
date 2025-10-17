@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Shield, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 
 export function Footer() {
   return (
@@ -9,9 +10,13 @@ export function Footer() {
           {/* Logo et description */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                <Shield className="w-8 h-8 text-bleu-rdc" />
-              </div>
+              <Image
+                src="/LogoSN1325.png"
+                alt="Logo SN1325"
+                width={48}
+                height={48}
+                className="object-contain bg-white rounded-lg p-1"
+              />
               <div>
                 <h3 className="text-xl font-bold">SN1325 RDC</h3>
                 <p className="text-blue-200 text-sm">
@@ -88,6 +93,36 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Section Partenaires */}
+        <div className="border-t border-blue-600 mt-8 pt-8">
+          <h4 className="text-lg font-semibold mb-4 text-center">
+            Nos Partenaires
+          </h4>
+          <div className="flex flex-wrap justify-center items-center gap-8">
+            <Image
+              src="/logoOnufemme.jpg"
+              alt="ONU Femmes"
+              width={120}
+              height={60}
+              className="object-contain bg-white p-2 rounded"
+            />
+            <Image
+              src="/LogoMinistere.jpg"
+              alt="Ministère du Genre"
+              width={100}
+              height={60}
+              className="object-contain bg-white p-2 rounded"
+            />
+            <Image
+              src="/norvege.png"
+              alt="Norvège"
+              width={120}
+              height={60}
+              className="object-contain bg-white p-2 rounded"
+            />
+          </div>
+        </div>
+
         {/* Séparateur */}
         <div className="border-t border-blue-600 mt-8 pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center">
@@ -97,7 +132,15 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-6 mt-4 sm:mt-0">
               <span className="text-blue-200 text-sm">
-                Résolution 1325 - 25 ans
+                Développé par{" "}
+                <Link
+                  href="https://akiligroup.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-jaune-rdc hover:text-white font-semibold transition-colors"
+                >
+                  Akili Group
+                </Link>
               </span>
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-jaune-rdc rounded-full"></div>

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Shield, Users, BarChart3, FileText } from "lucide-react";
+import Image from "next/image";
+import { Menu, X, Users, BarChart3, FileText } from "lucide-react";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,17 +16,21 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo et titre */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-bleu-rdc rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/LogoSN1325.png"
+                alt="Logo SN1325"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
               <div>
                 <h1 className="text-xl font-bold text-bleu-rdc">SN1325</h1>
                 <p className="text-xs text-gray-600">
                   République Démocratique du Congo
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Navigation desktop */}
