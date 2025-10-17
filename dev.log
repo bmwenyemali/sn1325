@@ -212,3 +212,22 @@
   path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json'
 }
  GET /dashboard 500 in 8921ms
+[Error: ENOENT: no such file or directory, open 'C:\Users\bienv\Mon Drive\AKILI\PROJECTS 2026\SN1325\sn1325-app\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json',
+  page: '/dashboard'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\bienv\Mon Drive\AKILI\PROJECTS 2026\SN1325\sn1325-app\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\bienv\Mon Drive\AKILI\PROJECTS 2026\SN1325\sn1325-app\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\bienv\\Mon Drive\\AKILI\\PROJECTS 2026\\SN1325\\sn1325-app\\.next\\routes-manifest.json'
+}
