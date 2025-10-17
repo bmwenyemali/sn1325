@@ -9,6 +9,43 @@
   --rouge-rdc: #ce1126;
 }
 
+/* Classes utilitaires forcées pour les couleurs RDC */
+.bg-bleu-rdc {
+  background-color: #002b7f !important;
+}
+
+.bg-jaune-rdc {
+  background-color: #fcd116 !important;
+}
+
+.bg-rouge-rdc {
+  background-color: #ce1126 !important;
+}
+
+.text-bleu-rdc {
+  color: #002b7f !important;
+}
+
+.text-jaune-rdc {
+  color: #fcd116 !important;
+}
+
+.text-rouge-rdc {
+  color: #ce1126 !important;
+}
+
+.border-bleu-rdc {
+  border-color: #002b7f !important;
+}
+
+.border-jaune-rdc {
+  border-color: #fcd116 !important;
+}
+
+.border-rouge-rdc {
+  border-color: #ce1126 !important;
+}
+
 /* Styles de base */
 body {
   background-color: #f9fafb;
