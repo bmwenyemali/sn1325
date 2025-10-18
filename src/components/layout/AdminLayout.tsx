@@ -12,7 +12,6 @@ import {
   Database,
   Users,
   Settings,
-  FileText,
   Shield,
   LogOut,
   ChevronDown,
@@ -42,13 +41,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navigation = [
     { name: "Tableau de bord", href: "/dashboard", icon: Home },
     {
-      name: "Référentiel",
+      name: "Références",
       href: "/dashboard/referentiel",
       icon: Database,
       submenu: [
-        { name: "Axes", href: "/dashboard/referentiel/axes" },
+        { name: "Axes Stratégiques", href: "/dashboard/referentiel/axes" },
         { name: "Indicateurs", href: "/dashboard/referentiel/indicateurs" },
+        {
+          name: "Grandes Catégories",
+          href: "/dashboard/referentiel/grandes-categories",
+        },
+        { name: "Catégories", href: "/dashboard/referentiel/categories" },
+        { name: "Cibles", href: "/dashboard/referentiel/cibles" },
         { name: "Provinces", href: "/dashboard/referentiel/provinces" },
+        { name: "Sexe", href: "/dashboard/referentiel/sexe" },
       ],
     },
     {
@@ -56,23 +62,31 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       href: "/dashboard/donnees",
       icon: BarChart3,
       submenu: [
-        { name: "Saisie", href: "/dashboard/donnees/saisie" },
-        { name: "Validation", href: "/dashboard/donnees/validation" },
-        { name: "Historique", href: "/dashboard/donnees/historique" },
+        { name: "Données Numériques", href: "/dashboard/donnees/data-numeric" },
+        { name: "Données Liste", href: "/dashboard/donnees/data-liste" },
+        { name: "Données Province", href: "/dashboard/donnees/data-province" },
       ],
     },
     {
-      name: "Rapports",
-      href: "/dashboard/rapports",
-      icon: FileText,
+      name: "Structures",
+      href: "/dashboard/structures",
+      icon: Users,
+    },
+    {
+      name: "Utilisateurs",
+      href: "/dashboard/utilisateurs",
+      icon: Shield,
+    },
+    {
+      name: "Paramètres",
+      href: "/dashboard/parametres",
+      icon: Settings,
       submenu: [
-        { name: "Statistiques", href: "/dashboard/rapports/statistiques" },
-        { name: "Exports", href: "/dashboard/rapports/exports" },
-        { name: "Graphiques", href: "/dashboard/rapports/graphiques" },
+        { name: "Configuration", href: "/dashboard/parametres/configuration" },
+        { name: "À propos", href: "/dashboard/parametres/about" },
+        { name: "Contact", href: "/dashboard/parametres/contact" },
       ],
     },
-    { name: "Utilisateurs", href: "/dashboard/utilisateurs", icon: Users },
-    { name: "Paramètres", href: "/dashboard/parametres", icon: Settings },
   ];
 
   const isActive = (href: string) =>
@@ -305,20 +319,24 @@ function SidebarContent({
 function getPageTitle(pathname: string): string {
   const titles: { [key: string]: string } = {
     "/dashboard": "Tableau de bord",
-    "/dashboard/referentiel": "Référentiel",
-    "/dashboard/referentiel/axes": "Gestion des Axes",
-    "/dashboard/referentiel/indicateurs": "Gestion des Indicateurs",
-    "/dashboard/referentiel/provinces": "Gestion des Provinces",
+    "/dashboard/referentiel": "Références",
+    "/dashboard/referentiel/axes": "Axes Stratégiques",
+    "/dashboard/referentiel/indicateurs": "Indicateurs",
+    "/dashboard/referentiel/grandes-categories": "Grandes Catégories",
+    "/dashboard/referentiel/categories": "Catégories",
+    "/dashboard/referentiel/cibles": "Cibles",
+    "/dashboard/referentiel/provinces": "Provinces",
+    "/dashboard/referentiel/sexe": "Sexe",
     "/dashboard/donnees": "Données",
-    "/dashboard/donnees/saisie": "Saisie de données",
-    "/dashboard/donnees/validation": "Validation des données",
-    "/dashboard/donnees/historique": "Historique des données",
-    "/dashboard/rapports": "Rapports",
-    "/dashboard/rapports/statistiques": "Statistiques",
-    "/dashboard/rapports/exports": "Exports",
-    "/dashboard/rapports/graphiques": "Graphiques",
-    "/dashboard/utilisateurs": "Gestion des utilisateurs",
+    "/dashboard/donnees/data-numeric": "Données Numériques",
+    "/dashboard/donnees/data-liste": "Données Liste",
+    "/dashboard/donnees/data-province": "Données Province",
+    "/dashboard/structures": "Structures",
+    "/dashboard/utilisateurs": "Utilisateurs",
     "/dashboard/parametres": "Paramètres",
+    "/dashboard/parametres/configuration": "Configuration",
+    "/dashboard/parametres/about": "À propos",
+    "/dashboard/parametres/contact": "Contact",
   };
 
   return titles[pathname] || "Administration";
