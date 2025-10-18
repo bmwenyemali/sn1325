@@ -15,7 +15,6 @@
 
 # next.js
 /.next/
-/.next-dev/
 /out/
 
 # production
@@ -40,6 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Windows reserved filenames accidentally created
-NUL
+.next-dev/

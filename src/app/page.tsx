@@ -2,21 +2,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BarChart, Users, Shield, CheckCircle } from "lucide-react";
 import CtaLink from "@/components/home/CtaLink";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function HomePage() {
+  const [logoError, setLogoError] = useState(false);
+
   return (
     <div className="space-y-16 pb-12">
       {/* Section Héros */}
       <section className="relative overflow-hidden bg-gradient-to-br from-bleu-rdc via-bleu-rdc-600 to-bleu-rdc-800 dark:from-slate-900 dark:via-bleu-rdc-900 dark:to-slate-950 p-16 md:p-20 rounded-2xl shadow-2xl">
         <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
         <div className="relative z-10 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-jaune-rdc rounded-full mb-6 shadow-lg animate-bounce-gentle">
-            <Shield className="w-10 h-10 text-bleu-rdc" />
+          {/* Logo SN1325 */}
+          <div className="inline-flex items-center justify-center mb-6">
+            {!logoError ? (
+              <Image
+                src="/logo-sn1325.png"
+                alt="Logo SN1325"
+                width={96}
+                height={96}
+                className="object-contain"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <div className="w-20 h-20 bg-jaune-rdc rounded-full shadow-lg animate-bounce-gentle flex items-center justify-center">
+                <Shield className="w-10 h-10 text-bleu-rdc" />
+              </div>
+            )}
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-white font-heading mb-6 animate-fade-in">
             Secrétariat National 1325
           </h1>
-          <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed mb-8 animate-fade-in">
+          <p className="text-lg md:text-xl text-white/90 dark:text-blue-100 max-w-3xl mx-auto leading-relaxed mb-8 animate-fade-in">
             Application de monitoring et de suivi de la mise en œuvre de la
             Résolution 1325 du Conseil de Sécurité des Nations Unies sur les
             Femmes, la Paix et la Sécurité en République Démocratique du Congo.

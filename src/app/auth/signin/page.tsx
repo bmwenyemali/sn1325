@@ -30,7 +30,8 @@ export default function SignInPage() {
       } else {
         router.push("/dashboard");
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Une erreur est survenue lors de la connexion");
     } finally {
       setLoading(false);
@@ -106,7 +107,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-bleu-rdc hover:bg-bleu-rdc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-rdc disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>
@@ -121,11 +122,6 @@ export default function SignInPage() {
             </Link>
           </div>
         </form>
-
-        <div className="mt-6 text-center text-xs text-gray-500">
-          <p>Compte par défaut :</p>
-          <p className="font-mono">admin@sn1325.cd / admin123</p>
-        </div>
       </div>
     </div>
   );

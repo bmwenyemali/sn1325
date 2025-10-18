@@ -46,19 +46,19 @@ export default function StructuresPage() {
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 shadow bg-white dark:bg-gray-900">
         <table className="w-full text-left">
-          <thead className="bg-gray-50 dark:bg-gray-800/70 text-gray-700 dark:text-gray-100">
+          <thead className="bg-gray-50 dark:bg-gray-800/50">
             <tr>
-              <th className="px-4 py-3 font-semibold">Nom</th>
-              <th className="px-4 py-3 font-semibold">Sigle</th>
-              <th className="px-4 py-3 font-semibold">Domaine</th>
-              <th className="px-4 py-3 font-semibold">Province</th>
+              <th className="px-4 py-3">Nom</th>
+              <th className="px-4 py-3">Sigle</th>
+              <th className="px-4 py-3">Domaine</th>
+              <th className="px-4 py-3">Province</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
               <tr
                 key={i}
-                className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors text-gray-800 dark:text-gray-100"
+                className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors"
               >
                 <td className="px-4 py-3 font-medium">{r.nom}</td>
                 <td className="px-4 py-3">{r.sigle || "—"}</td>
