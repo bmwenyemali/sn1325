@@ -27,7 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         await dbConnect();
 
         const email = String(credentials.email).toLowerCase();
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate("role");
 
         if (!user) {
           return null;
@@ -43,13 +43,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const u = user as AuthUser;
+        // Le role est maintenant peuplé, on récupère son code
+        const roleCode =
+          user.role && typeof user.role === "object"
+            ? ((user.role as Record<string, unknown>).code as string)
+            : "USER";
+
         return {
           id: user._id.toString(),
           email: String(user.email),
           name: u.name || `${user.nom || ""} ${user.prenom || ""}`.trim(),
           nom: String(user.nom || ""),
           prenom: String(user.prenom || ""),
-          role: user.role ? user.role.toString() : "",
+          role: roleCode || "USER",
         };
       },
     }),

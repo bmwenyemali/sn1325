@@ -16,34 +16,55 @@ export default function AdminImportPage() {
     details?: string;
   } | null>(null);
 
-  // Vérifier si l'utilisateur est admin
-  if (session?.user) {
-    const userRole =
-      typeof session.user.role === "string"
-        ? session.user.role
-        : session.user.role?.code;
-
-    if (userRole !== "ADMIN") {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Accès Refusé
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Cette page est réservée aux administrateurs.
-            </p>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="btn-primary w-full"
-            >
-              Retour au Dashboard
-            </button>
-          </div>
+  // Vérifier si l'utilisateur est connecté
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Non Connecté
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Veuillez vous connecter pour accéder à cette page.
+          </p>
+          <button
+            onClick={() => router.push("/auth/signin")}
+            className="btn-primary w-full"
+          >
+            Se Connecter
+          </button>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  // Vérifier si l'utilisateur est admin
+  const userRole = session.user?.role;
+
+  if (userRole !== "ADMIN") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Accès Refusé
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Cette page est réservée aux administrateurs.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+            Votre rôle actuel: {userRole || "Non défini"}
+          </p>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="btn-primary w-full"
+          >
+            Retour au Dashboard
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const handleImport = async () => {

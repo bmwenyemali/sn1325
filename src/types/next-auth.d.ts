@@ -1,5 +1,4 @@
 import { DefaultSession } from "next-auth";
-import { Role } from "@/types/auth";
 
 declare module "next-auth" {
   interface Session {
@@ -8,7 +7,7 @@ declare module "next-auth" {
       nom: string;
       prenom: string;
       email: string;
-      role: Role;
+      role: string;
       privileges: string[];
       province?: string;
       image?: string;
@@ -22,7 +21,7 @@ declare module "next-auth" {
     nom: string;
     prenom: string;
     email: string;
-    role: Role;
+    role: string;
     province?: string;
     image?: string;
     fonction?: string;
@@ -35,7 +34,7 @@ declare module "next-auth/jwt" {
     id: string;
     nom: string;
     prenom: string;
-    role: Role;
+    role: string;
     province?: string;
     fonction?: string;
     organisation?: string;

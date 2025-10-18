@@ -28,10 +28,7 @@ export default function UsersManagementPage() {
   useEffect(() => {
     // Check if user is admin
     if (session?.user && "role" in session.user) {
-      const userRole =
-        typeof session.user.role === "string"
-          ? session.user.role
-          : session.user.role?.code;
+      const userRole = session.user.role;
       if (userRole !== "ADMIN") {
         router.push("/dashboard");
       }

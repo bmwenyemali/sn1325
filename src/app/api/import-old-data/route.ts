@@ -12,10 +12,7 @@ export async function POST() {
     }
 
     // Vérifier le rôle admin
-    const userRole =
-      typeof session.user.role === "string"
-        ? session.user.role
-        : session.user.role?.code;
+    const userRole = session.user.role;
 
     if (userRole !== "ADMIN") {
       return NextResponse.json(
