@@ -388,6 +388,8 @@ export async function importAllOldData(clearExisting = false) {
     // Option: Supprimer les données existantes
     if (clearExisting) {
       console.log("🗑️  Suppression des données existantes...");
+      
+      // Supprimer les données
       await Promise.all([
         Axe.deleteMany({}),
         GrandeCategorie.deleteMany({}),
@@ -402,6 +404,42 @@ export async function importAllOldData(clearExisting = false) {
         DataNumeric.deleteMany({}),
         DataQualitative.deleteMany({}),
       ]);
+      
+      // Supprimer les anciens index pour éviter les conflits
+      console.log("🗑️  Suppression des anciens index...");
+      try {
+        const collections = [
+          Axe,
+          GrandeCategorie,
+          Categorie,
+          Cible,
+          Province,
+          Annee,
+          Structure,
+          TypeLMA,
+          LoisMesuresActions,
+          Indicateur,
+          DataNumeric,
+          DataQualitative,
+        ];
+        
+        for (const Model of collections) {
+          try {
+            await Model.collection.dropIndexes();
+            console.log(`  ✓ Index supprimés pour ${Model.modelName}`);
+          } catch (err: unknown) {
+            // Ignorer l'erreur si la collection n'existe pas
+            const error = err as { code?: number };
+            if (error.code !== 26) {
+              // 26 = NamespaceNotFound
+              console.warn(`  ⚠ Erreur suppression index ${Model.modelName}:`, err);
+            }
+          }
+        }
+      } catch (error) {
+        console.warn("⚠️  Erreur lors de la suppression des index:", error);
+      }
+      
       console.log("✅ Données existantes supprimées\n");
     }
 
