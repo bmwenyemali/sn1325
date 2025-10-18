@@ -132,14 +132,18 @@ async function importCibles() {
       continue;
     }
 
-    const newCible = await Cible.create({
-      nom: cible.Nom,
-      categorie: categorieId,
-      grandeCategorie: grandeCategorieId,
-      ordre: cible.ID,
-    });
-    idMaps.cibles.set(cible.ID, newCible._id.toString());
-    console.log(`  ✓ Cible créée: ${cible.Nom}`);
+    const result = await Cible.findOneAndUpdate(
+      { nom: cible.Nom },
+      {
+        nom: cible.Nom,
+        categorie: categorieId,
+        grandeCategorie: grandeCategorieId,
+        ordre: parseInt(cible.ID, 10) || 0,
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.cibles.set(parseInt(cible.ID, 10) || 0, result._id.toString());
+    console.log(`  ✓ Cible créée/mise à jour: ${cible.Nom}`);
   }
   console.log(`✅ ${cibles.length} cibles importées`);
 }
@@ -149,13 +153,17 @@ async function importProvinces() {
   const provinces = readJsonFile("AllProvinces.json");
 
   for (const prov of provinces) {
-    const newProv = await Province.create({
-      nom: prov.Nom,
-      ordre: prov.ID,
-      actif: true,
-    });
-    idMaps.provinces.set(prov.ID, newProv._id.toString());
-    console.log(`  ✓ Province créée: ${prov.Nom}`);
+    const result = await Province.findOneAndUpdate(
+      { nom: prov.Nom },
+      {
+        nom: prov.Nom,
+        ordre: parseInt(prov.ID, 10) || 0,
+        actif: true,
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.provinces.set(parseInt(prov.ID, 10) || 0, result._id.toString());
+    console.log(`  ✓ Province créée/mise à jour: ${prov.Nom}`);
   }
   console.log(`✅ ${provinces.length} provinces importées`);
 }
@@ -165,13 +173,24 @@ async function importAnnees() {
   const annees = readJsonFile("All-Annees.json");
 
   for (const annee of annees) {
-    const newAnnee = await Annee.create({
-      annee: annee.Nom,
-      actif: true,
-      ordre: annee.ID,
-    });
-    idMaps.annees.set(annee.ID, newAnnee._id.toString());
-    console.log(`  ✓ Année créée: ${annee.Nom}`);
+    const anneeValue = parseInt(annee.Valeur, 10);
+
+    if (isNaN(anneeValue)) {
+      console.warn(`  ⚠ Année invalide: ${annee.Valeur}`);
+      continue;
+    }
+
+    const result = await Annee.findOneAndUpdate(
+      { annee: anneeValue },
+      {
+        annee: anneeValue,
+        actif: true,
+        ordre: parseInt(annee.ID, 10),
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.annees.set(parseInt(annee.ID, 10), result._id.toString());
+    console.log(`  ✓ Année créée/mise à jour: ${anneeValue}`);
   }
   console.log(`✅ ${annees.length} années importées`);
 }
@@ -181,14 +200,28 @@ async function importStructures() {
   const structures = readJsonFile("All-Structures.json");
 
   for (const struct of structures) {
-    const newStruct = await Structure.create({
-      nom: struct.Nom,
-      type: struct.Type || "Organisation",
-      description: struct.Description,
-      actif: true,
-    });
-    idMaps.structures.set(struct.ID, newStruct._id.toString());
-    console.log(`  ✓ Structure créée: ${struct.Nom}`);
+    // Skip if no name
+    if (!struct.Nom || struct.Nom.trim() === "") {
+      console.warn(`  ⚠ Structure sans nom, ignorée`);
+      continue;
+    }
+
+    const result = await Structure.findOneAndUpdate(
+      { nom: struct.Nom },
+      {
+        nom: struct.Nom,
+        sigle: struct.Sigle || "",
+        type: struct.Type || "Organisation",
+        description: struct.APropos || struct.Description || "",
+        province: struct.Province || "",
+        adresse: struct.Adresse || "",
+        telephone: struct["Phone Organisation"] || struct.Phone || "",
+        email: struct["Email Organisation"] || struct.Email || "",
+        actif: true,
+      },
+      { upsert: true, new: true }
+    );
+    console.log(`  ✓ Structure créée/mise à jour: ${struct.Nom}`);
   }
   console.log(`✅ ${structures.length} structures importées`);
 }
@@ -388,7 +421,7 @@ export async function importAllOldData(clearExisting = false) {
     // Option: Supprimer les données existantes
     if (clearExisting) {
       console.log("🗑️  Suppression des données existantes...");
-      
+
       // Supprimer les données
       await Promise.all([
         Axe.deleteMany({}),
@@ -404,7 +437,7 @@ export async function importAllOldData(clearExisting = false) {
         DataNumeric.deleteMany({}),
         DataQualitative.deleteMany({}),
       ]);
-      
+
       // Supprimer les anciens index pour éviter les conflits
       console.log("🗑️  Suppression des anciens index...");
       try {
@@ -422,7 +455,7 @@ export async function importAllOldData(clearExisting = false) {
           DataNumeric,
           DataQualitative,
         ];
-        
+
         for (const Model of collections) {
           try {
             await Model.collection.dropIndexes();
@@ -432,14 +465,17 @@ export async function importAllOldData(clearExisting = false) {
             const error = err as { code?: number };
             if (error.code !== 26) {
               // 26 = NamespaceNotFound
-              console.warn(`  ⚠ Erreur suppression index ${Model.modelName}:`, err);
+              console.warn(
+                `  ⚠ Erreur suppression index ${Model.modelName}:`,
+                err
+              );
             }
           }
         }
       } catch (error) {
         console.warn("⚠️  Erreur lors de la suppression des index:", error);
       }
-      
+
       console.log("✅ Données existantes supprimées\n");
     }
 
