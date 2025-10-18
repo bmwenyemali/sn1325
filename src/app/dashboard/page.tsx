@@ -146,12 +146,14 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {stat.name}
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                   {stat.value}
                 </p>
                 <div className="flex items-center mt-2">
@@ -189,8 +191,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Quick Actions */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
               Actions rapides
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -198,7 +200,7 @@ export default function DashboardPage() {
                 <a
                   key={action.name}
                   href={action.href}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-bleu-rdc hover:bg-blue-50 transition-colors group"
+                  className="block p-4 border border-gray-200 dark:border-slate-600 rounded-lg hover:border-bleu-rdc dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors group"
                 >
                   <div className="flex items-start space-x-4">
                     <div
@@ -207,10 +209,10 @@ export default function DashboardPage() {
                       <action.icon className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 group-hover:text-bleu-rdc">
+                      <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-bleu-rdc dark:group-hover:text-blue-400">
                         {action.name}
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         {action.description}
                       </p>
                     </div>
@@ -221,8 +223,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Progress Overview */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mt-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
               Aperçu des progrès
             </h2>
             <div className="space-y-4">
@@ -235,12 +237,14 @@ export default function DashboardPage() {
               ].map((item) => (
                 <div key={item.label}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {item.label}
                     </span>
-                    <span className="text-sm text-gray-500">{item.value}%</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {item.value}%
+                    </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                     <div
                       className={`${item.color} h-2 rounded-full transition-all duration-500`}
                       style={{ width: `${item.value}%` }}
@@ -254,8 +258,8 @@ export default function DashboardPage() {
 
         {/* Recent Activities */}
         <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
               Activités récentes
             </h2>
             <div className="space-y-4">
@@ -269,15 +273,17 @@ export default function DashboardPage() {
                     }`}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 leading-5">
+                    <p className="text-sm text-gray-900 dark:text-gray-100 leading-5">
                       {activity.message}
                     </p>
                     <div className="flex items-center mt-1 space-x-2">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {activity.user}
                       </span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                        •
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {activity.time}
                       </span>
                     </div>
@@ -285,14 +291,14 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-4 text-sm text-bleu-rdc font-medium hover:text-bleu-rdc-700 transition-colors">
+            <button className="w-full mt-4 text-sm text-bleu-rdc dark:text-blue-400 font-medium hover:text-bleu-rdc-700 dark:hover:text-blue-300 transition-colors">
               Voir toutes les activités →
             </button>
           </div>
 
           {/* System Status */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mt-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
               État du système
             </h2>
             <div className="space-y-3">
@@ -307,8 +313,10 @@ export default function DashboardPage() {
                   className="flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-2">
-                    <item.icon className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">{item.label}</span>
+                    <item.icon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {item.label}
+                    </span>
                   </div>
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${

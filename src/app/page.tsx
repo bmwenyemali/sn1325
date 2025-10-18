@@ -14,20 +14,21 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-bleu-rdc via-bleu-rdc-600 to-bleu-rdc-800 dark:from-slate-900 dark:via-bleu-rdc-900 dark:to-slate-950 p-16 md:p-20 rounded-2xl shadow-2xl">
         <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
         <div className="relative z-10 text-center">
-          {/* Logo SN1325 */}
-          <div className="inline-flex items-center justify-center mb-6">
+          {/* Logo SN1325 - Grand format */}
+          <div className="inline-flex items-center justify-center mb-8">
             {!logoError ? (
               <Image
                 src="/logo-sn1325.png"
                 alt="Logo SN1325"
-                width={96}
-                height={96}
-                className="object-contain"
+                width={200}
+                height={200}
+                className="object-contain drop-shadow-2xl"
+                priority
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-20 h-20 bg-jaune-rdc rounded-full shadow-lg animate-bounce-gentle flex items-center justify-center">
-                <Shield className="w-10 h-10 text-bleu-rdc" />
+              <div className="w-40 h-40 bg-jaune-rdc rounded-full shadow-2xl animate-bounce-gentle flex items-center justify-center">
+                <Shield className="w-20 h-20 text-bleu-rdc" />
               </div>
             )}
           </div>

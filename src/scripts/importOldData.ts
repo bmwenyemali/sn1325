@@ -206,21 +206,27 @@ async function importStructures() {
       continue;
     }
 
+    const structId = parseInt(struct.ID, 10);
+    if (isNaN(structId)) {
+      console.warn(`  ⚠ ID invalide pour structure: ${struct.Nom}`);
+      continue;
+    }
+
     const result = await Structure.findOneAndUpdate(
       { nom: struct.Nom },
       {
         nom: struct.Nom,
-        sigle: struct.Sigle || "",
         type: struct.Type || "Organisation",
         description: struct.APropos || struct.Description || "",
-        province: struct.Province || "",
         adresse: struct.Adresse || "",
         telephone: struct["Phone Organisation"] || struct.Phone || "",
         email: struct["Email Organisation"] || struct.Email || "",
+        siteWeb: struct.SiteWeb || "",
         actif: true,
       },
       { upsert: true, new: true }
     );
+    idMaps.structures.set(structId, result._id.toString());
     console.log(`  ✓ Structure créée/mise à jour: ${struct.Nom}`);
   }
   console.log(`✅ ${structures.length} structures importées`);
@@ -237,12 +243,13 @@ async function importTypesLMA() {
 
   let id = 1;
   for (const type of types) {
-    const newType = await TypeLMA.create({
-      nom: type.nom,
-      code: type.code,
-    });
+    const newType = await TypeLMA.findOneAndUpdate(
+      { code: type.code },
+      { nom: type.nom, code: type.code },
+      { upsert: true, new: true }
+    );
     idMaps.typeLMA.set(id++, newType._id.toString());
-    console.log(`  ✓ Type LMA créé: ${type.nom}`);
+    console.log(`  ✓ Type LMA créé/mis à jour: ${type.nom}`);
   }
   console.log(`✅ ${types.length} types LMA importés`);
 }
@@ -257,16 +264,26 @@ async function importLoisMesuresActions() {
     else if (lma.Type === "Mécanisme") typeId = idMaps.typeLMA.get(3);
     else if (lma.Type === "Action") typeId = idMaps.typeLMA.get(4);
 
-    const newLMA = await LoisMesuresActions.create({
-      nom: lma.Nom,
-      type: typeId,
-      description: lma.Description,
-      annee: lma.Annee,
-      reference: lma.Reference,
-      statut: "en vigueur",
-    });
-    idMaps.loisMesuresActions.set(lma.ID, newLMA._id.toString());
-    console.log(`  ✓ ${lma.Type} créé: ${lma.Nom}`);
+    const lmaId = parseInt(lma.ID, 10);
+    if (isNaN(lmaId)) {
+      console.warn(`  ⚠ ID invalide pour LMA: ${lma.Nom}`);
+      continue;
+    }
+
+    const newLMA = await LoisMesuresActions.findOneAndUpdate(
+      { nom: lma.Nom, type: typeId },
+      {
+        nom: lma.Nom,
+        type: typeId,
+        description: lma.Description || "",
+        annee: lma.Annee ? parseInt(lma.Annee, 10) : undefined,
+        reference: lma.Reference,
+        statut: "en vigueur",
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.loisMesuresActions.set(lmaId, newLMA._id.toString());
+    console.log(`  ✓ ${lma.Type} créé/mis à jour: ${lma.Nom}`);
   }
   console.log(`✅ ${lmas.length} lois/mesures/actions importées`);
 }
@@ -285,18 +302,28 @@ async function importIndicateurs() {
     // Désagrégeable: 1 = numérique, 2 = qualitatif
     const type = ind.Désagrégeable === 1 ? "numerique" : "qualitatif";
 
-    const newInd = await Indicateur.create({
-      nom: ind.Nom,
-      axe: axeId,
-      type: type,
-      desagregableParSexe: ind.sexeYN === 1,
-      desagregableParProvince: ind.ProvinceYN === 1,
-      desagregableParAnnee: true,
-      avecCible: ind.cibleYN === 1,
-      ordre: ind.ID,
-    });
-    idMaps.indicateurs.set(ind.ID, newInd._id.toString());
-    console.log(`  ✓ Indicateur créé: ${ind.Nom} (${type})`);
+    const indId = parseInt(ind.ID, 10);
+    if (isNaN(indId)) {
+      console.warn(`  ⚠ ID invalide pour indicateur: ${ind.Nom}`);
+      continue;
+    }
+
+    const newInd = await Indicateur.findOneAndUpdate(
+      { nom: ind.Nom, axe: axeId },
+      {
+        nom: ind.Nom,
+        axe: axeId,
+        type: type,
+        desagregableParSexe: ind.sexeYN === 1,
+        desagregableParProvince: ind.ProvinceYN === 1,
+        desagregableParAnnee: true,
+        avecCible: ind.cibleYN === 1,
+        ordre: indId,
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.indicateurs.set(indId, newInd._id.toString());
+    console.log(`  ✓ Indicateur créé/mis à jour: ${ind.Nom} (${type})`);
   }
   console.log(`✅ ${indicateurs.length} indicateurs importés`);
 }
@@ -321,20 +348,28 @@ async function importDataNumeric() {
     else if (d.Sexe === "F" || d.Sexe === "Femme") sexe = "Femme";
 
     try {
-      await DataNumeric.create({
-        indicateur: indicateurId,
-        annee: d.Annee,
-        sexe: sexe,
-        province: provinceId,
-        cible: cibleId,
-        valeur: d.Valeur || 0,
-        pourcentage: d.Pourcentage,
-      });
+      await DataNumeric.findOneAndUpdate(
+        {
+          indicateur: indicateurId,
+          annee: d.Annee,
+          sexe: sexe,
+          province: provinceId || null,
+          cible: cibleId || null,
+        },
+        {
+          indicateur: indicateurId,
+          annee: d.Annee,
+          sexe: sexe,
+          province: provinceId,
+          cible: cibleId,
+          valeur: d.Valeur || 0,
+          pourcentage: d.Pourcentage,
+        },
+        { upsert: true, new: true }
+      );
       imported++;
     } catch (error: any) {
-      if (!error.message?.includes("duplicate key")) {
-        console.warn(`  ⚠ Erreur import donnée: ${error.message}`);
-      }
+      console.warn(`  ⚠ Erreur import donnée: ${error.message}`);
     }
   }
   console.log(`✅ ${imported}/${data.length} données numériques importées`);
@@ -371,12 +406,15 @@ async function importDataQualitative() {
       .filter((item) => item !== null);
 
     if (mappedItems.length > 0) {
-      await DataQualitative.create({
-        indicateur: indicateurId,
-        items: mappedItems,
-      });
+      await DataQualitative.findOneAndUpdate(
+        { indicateur: indicateurId },
+        { indicateur: indicateurId, items: mappedItems },
+        { upsert: true, new: true }
+      );
       imported++;
-      console.log(`  ✓ Liste qualitative créée pour indicateur ID ${oldIndId}`);
+      console.log(
+        `  ✓ Liste qualitative créée/mise à jour pour indicateur ID ${oldIndId}`
+      );
     }
   }
   console.log(`✅ ${imported} listes qualitatives importées`);
