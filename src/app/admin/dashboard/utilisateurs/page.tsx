@@ -15,11 +15,11 @@ interface User {
   nom: string;
   prenom: string;
   email: string;
-  role: "ADMIN" | "USER" | "VIEWER";
+  role: "ADMIN" | "USER";
   province?: Province;
   fonction?: string;
   organisation?: string;
-  statut: "actif" | "inactif";
+  statut: "actif" | "inactif" | "suspendu";
 }
 
 export default function UsersManagementPage() {
@@ -38,11 +38,11 @@ export default function UsersManagementPage() {
     prenom: "",
     email: "",
     password: "",
-    role: "USER" as "ADMIN" | "USER" | "VIEWER",
+    role: "USER" as "ADMIN" | "USER",
     province: "",
     fonction: "",
     organisation: "",
-    statut: "actif" as "actif" | "inactif",
+    statut: "actif" as "actif" | "inactif" | "suspendu",
   });
 
   useEffect(() => {
@@ -54,7 +54,6 @@ export default function UsersManagementPage() {
       }
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 
   const fetchData = async () => {
@@ -102,7 +101,11 @@ export default function UsersManagementPage() {
       if (result.success) {
         await fetchData();
         resetForm();
-        alert(editingUser ? "Utilisateur mis à jour avec succès" : "Utilisateur créé avec succès");
+        alert(
+          editingUser
+            ? "Utilisateur mis à jour avec succès"
+            : "Utilisateur créé avec succès"
+        );
       } else {
         alert("Erreur: " + result.error);
       }
@@ -295,12 +298,10 @@ export default function UsersManagementPage() {
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.role === "ADMIN"
                             ? "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
-                            : user.role === "USER"
-                            ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                         }`}
                       >
-                        {user.role}
+                        {user.role === "ADMIN" ? "Admin" : "Utilisateur"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -459,7 +460,8 @@ export default function UsersManagementPage() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Mot de passe {editingUser ? "(laisser vide pour ne pas changer)" : "*"}
+                    Mot de passe{" "}
+                    {editingUser ? "(laisser vide pour ne pas changer)" : "*"}
                   </label>
                   <input
                     type="password"
@@ -469,7 +471,9 @@ export default function UsersManagementPage() {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc dark:bg-gray-700 dark:text-white"
-                    placeholder={editingUser ? "Laisser vide pour garder le même" : ""}
+                    placeholder={
+                      editingUser ? "Laisser vide pour garder le même" : ""
+                    }
                   />
                 </div>
 
@@ -483,14 +487,13 @@ export default function UsersManagementPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        role: e.target.value as "ADMIN" | "USER" | "VIEWER",
+                        role: e.target.value as "ADMIN" | "USER",
                       })
                     }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc dark:bg-gray-700 dark:text-white"
                   >
                     <option value="USER">Utilisateur</option>
                     <option value="ADMIN">Administrateur</option>
-                    <option value="VIEWER">Lecteur</option>
                   </select>
                 </div>
 
@@ -504,13 +507,17 @@ export default function UsersManagementPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        statut: e.target.value as "actif" | "inactif",
+                        statut: e.target.value as
+                          | "actif"
+                          | "inactif"
+                          | "suspendu",
                       })
                     }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc dark:bg-gray-700 dark:text-white"
                   >
                     <option value="actif">Actif</option>
                     <option value="inactif">Inactif</option>
+                    <option value="suspendu">Suspendu</option>
                   </select>
                 </div>
 

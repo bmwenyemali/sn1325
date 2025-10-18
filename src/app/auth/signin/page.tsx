@@ -28,7 +28,16 @@ export default function SignInPage() {
       if (result?.error) {
         setError("Email ou mot de passe incorrect");
       } else {
-        router.push("/dashboard");
+        // Fetch session to get user role
+        const response = await fetch("/api/auth/session");
+        const session = await response.json();
+
+        // Redirect based on role
+        if (session?.user?.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/user/dashboard");
+        }
       }
     } catch (err) {
       console.error("Login error:", err);

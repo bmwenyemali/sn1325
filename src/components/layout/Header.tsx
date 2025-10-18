@@ -50,18 +50,15 @@ export function Header() {
             {session && (
               <>
                 <Link
-                  href="/dashboard/rapports/statistiques"
+                  href={
+                    session.user?.role === "ADMIN"
+                      ? "/admin/dashboard/rapports/statistiques"
+                      : "/user/dashboard/statistiques"
+                  }
                   className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>Statistiques</span>
-                </Link>
-                <Link
-                  href="/dashboard/referentiel/axes"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Axes Stratégiques</span>
                 </Link>
                 <Link
                   href="/structures"
@@ -78,7 +75,14 @@ export function Header() {
                 Se connecter
               </Link>
             ) : (
-              <Link href="/dashboard" className="btn-primary">
+              <Link
+                href={
+                  session.user?.role === "ADMIN"
+                    ? "/admin/dashboard"
+                    : "/user/dashboard"
+                }
+                className="btn-primary"
+              >
                 Tableau de Bord
               </Link>
             )}
@@ -114,20 +118,16 @@ export function Header() {
               {session && (
                 <>
                   <Link
-                    href="/dashboard/rapports/statistiques"
+                    href={
+                      session.user?.role === "ADMIN"
+                        ? "/admin/dashboard/rapports/statistiques"
+                        : "/user/dashboard/statistiques"
+                    }
                     className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <BarChart3 className="w-4 h-4" />
                     <span>Statistiques</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/referentiel/axes"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Axes Stratégiques</span>
                   </Link>
                   <Link
                     href="/structures"
@@ -151,7 +151,11 @@ export function Header() {
                   </Link>
                 ) : (
                   <Link
-                    href="/dashboard"
+                    href={
+                      session.user?.role === "ADMIN"
+                        ? "/admin/dashboard"
+                        : "/user/dashboard"
+                    }
                     className="btn-primary block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >

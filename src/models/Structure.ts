@@ -8,6 +8,16 @@ export interface IStructure extends Document {
   telephone?: string;
   email?: string;
   siteWeb?: string;
+  axes?: mongoose.Types.ObjectId[]; // Reference to Axe model
+  cible?: string[]; // Array of target groups (enfants, femmes, etc.)
+  aPropos?: string; // About the structure (rich text)
+  pointFocal?: string; // Focal point contact person
+  adresseGeographic?: {
+    latitude?: number;
+    longitude?: number;
+    description?: string;
+  }; // Geographic coordinates for Google Maps
+  province?: mongoose.Types.ObjectId; // Reference to Province model
   actif: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -46,6 +56,46 @@ const StructureSchema: Schema = new Schema(
       type: String,
       trim: true,
     },
+    axes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Axe",
+      },
+    ],
+    cible: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    aPropos: {
+      type: String,
+      trim: true,
+    },
+    pointFocal: {
+      type: String,
+      trim: true,
+    },
+    adresseGeographic: {
+      latitude: {
+        type: Number,
+        min: -90,
+        max: 90,
+      },
+      longitude: {
+        type: Number,
+        min: -180,
+        max: 180,
+      },
+      description: {
+        type: String,
+        trim: true,
+      },
+    },
+    province: {
+      type: Schema.Types.ObjectId,
+      ref: "Province",
+    },
     actif: {
       type: Boolean,
       default: true,
@@ -61,6 +111,8 @@ const StructureSchema: Schema = new Schema(
 // Indexes
 StructureSchema.index({ nom: 1 });
 StructureSchema.index({ type: 1 });
+StructureSchema.index({ axes: 1 });
+StructureSchema.index({ province: 1 });
 
 export default mongoose.models.Structure ||
   mongoose.model<IStructure>("Structure", StructureSchema);

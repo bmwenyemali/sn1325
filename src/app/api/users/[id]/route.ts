@@ -60,9 +60,12 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // Hash password if provided
-    if (body.password) {
+    // Hash password if provided and not empty
+    if (body.password && body.password.trim() !== "") {
       body.password = await bcrypt.hash(body.password, 10);
+    } else {
+      // Remove password field if empty (don't update it)
+      delete body.password;
     }
 
     const user = await User.findByIdAndUpdate(
@@ -83,6 +86,19 @@ export async function PATCH(
     return NextResponse.json({ success: true, data: user });
   } catch (error: unknown) {
     console.error("Erreur PATCH /api/users/[id]:", error);
+
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === 11000
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Cet email est déjà utilisé" },
+        { status: 400 }
+      );
+    }
+
     const err = error as Error;
     return NextResponse.json(
       { success: false, error: err.message || "Erreur serveur" },

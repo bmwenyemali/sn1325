@@ -12,7 +12,9 @@ export async function GET(
     await connectDB();
     const { id } = await params;
 
-    const structure = await Structure.findById(id).populate("province");
+    const structure = await Structure.findById(id)
+      .populate("province")
+      .populate("axes");
 
     if (!structure) {
       return NextResponse.json(
@@ -53,7 +55,9 @@ export async function PATCH(
       id,
       { ...body, dateModification: new Date() },
       { new: true, runValidators: true }
-    ).populate("province");
+    )
+      .populate("province")
+      .populate("axes");
 
     if (!structure) {
       return NextResponse.json(

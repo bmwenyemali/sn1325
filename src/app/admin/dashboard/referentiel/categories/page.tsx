@@ -252,7 +252,7 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="mb-6">
         <Link
-          href="/dashboard/referentiel"
+          href="/admin/dashboard/referentiel"
           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

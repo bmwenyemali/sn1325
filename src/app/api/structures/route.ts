@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
     const province = searchParams.get("province");
+    const axe = searchParams.get("axe");
 
     const query: Record<string, unknown> = {};
     if (type) query.type = type;
     if (province) query.province = province;
+    if (axe) query.axes = axe;
 
     const structures = await Structure.find(query)
       .populate("province")
+      .populate("axes")
       .sort({ nom: 1 });
 
     return NextResponse.json({ success: true, data: structures });

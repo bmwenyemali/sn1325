@@ -39,52 +39,69 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   const navigation = [
-    { name: "Tableau de bord", href: "/dashboard", icon: Home },
+    { name: "Dashboard", href: "/admin/dashboard", icon: Home },
     {
-      name: "Références",
-      href: "/dashboard/referentiel",
-      icon: Database,
+      name: "Données",
+      href: "/admin/dashboard/donnees",
+      icon: BarChart3,
       submenu: [
-        { name: "Axes Stratégiques", href: "/dashboard/referentiel/axes" },
-        { name: "Indicateurs", href: "/dashboard/referentiel/indicateurs" },
         {
-          name: "Grandes Catégories",
-          href: "/dashboard/referentiel/grandes-categories",
+          name: "Données Numériques",
+          href: "/admin/dashboard/donnees/data-numeric",
         },
-        { name: "Catégories", href: "/dashboard/referentiel/categories" },
-        { name: "Cibles", href: "/dashboard/referentiel/cibles" },
-        { name: "Provinces", href: "/dashboard/referentiel/provinces" },
-        { name: "Sexe", href: "/dashboard/referentiel/sexe" },
+        { name: "Données Liste", href: "/admin/dashboard/donnees/data-liste" },
+        {
+          name: "Données Province",
+          href: "/admin/dashboard/donnees/data-province",
+        },
       ],
     },
     {
-      name: "Données",
-      href: "/dashboard/donnees",
-      icon: BarChart3,
+      name: "Références",
+      href: "/admin/dashboard/referentiel",
+      icon: Database,
       submenu: [
-        { name: "Données Numériques", href: "/dashboard/donnees/data-numeric" },
-        { name: "Données Liste", href: "/dashboard/donnees/data-liste" },
-        { name: "Données Province", href: "/dashboard/donnees/data-province" },
+        {
+          name: "Axes Stratégiques",
+          href: "/admin/dashboard/referentiel/axes",
+        },
+        {
+          name: "Indicateurs",
+          href: "/admin/dashboard/referentiel/indicateurs",
+        },
+        {
+          name: "Grandes Catégories",
+          href: "/admin/dashboard/referentiel/grandes-categories",
+        },
+        { name: "Catégories", href: "/admin/dashboard/referentiel/categories" },
+        { name: "Cibles", href: "/admin/dashboard/referentiel/cibles" },
+        { name: "Provinces", href: "/admin/dashboard/referentiel/provinces" },
+        { name: "Sexe", href: "/admin/dashboard/referentiel/sexe" },
+        { name: "Type", href: "/admin/dashboard/referentiel/type" },
+        { name: "Années", href: "/admin/dashboard/referentiel/annees" },
       ],
     },
     {
       name: "Structures",
-      href: "/dashboard/structures",
+      href: "/admin/dashboard/structures",
       icon: Users,
     },
     {
       name: "Utilisateurs",
-      href: "/dashboard/utilisateurs",
+      href: "/admin/dashboard/utilisateurs",
       icon: Shield,
     },
     {
       name: "Paramètres",
-      href: "/dashboard/parametres",
+      href: "/admin/dashboard/parametres",
       icon: Settings,
       submenu: [
-        { name: "Configuration", href: "/dashboard/parametres/configuration" },
-        { name: "À propos", href: "/dashboard/parametres/about" },
-        { name: "Contact", href: "/dashboard/parametres/contact" },
+        {
+          name: "Configuration",
+          href: "/admin/dashboard/parametres/configuration",
+        },
+        { name: "À propos", href: "/admin/dashboard/parametres/about" },
+        { name: "Contact", href: "/admin/dashboard/parametres/contact" },
       ],
     },
   ];
@@ -153,9 +170,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <div className="hidden lg:flex items-center justify-between px-6 h-16">
             <nav className="flex space-x-1">
               <Link
-                href="/dashboard/donnees"
+                href="/admin/dashboard"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/donnees")
+                  pathname === "/admin/dashboard"
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/admin/dashboard/donnees"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/admin/dashboard/donnees")
                     ? "bg-bleu-rdc text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
@@ -163,9 +190,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 Données
               </Link>
               <Link
-                href="/dashboard/referentiel"
+                href="/admin/dashboard/referentiel"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/referentiel")
+                  pathname.startsWith("/admin/dashboard/referentiel")
                     ? "bg-bleu-rdc text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
@@ -173,9 +200,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 Références
               </Link>
               <Link
-                href="/dashboard/structures"
+                href="/admin/dashboard/structures"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname === "/dashboard/structures"
+                  pathname === "/admin/dashboard/structures"
                     ? "bg-bleu-rdc text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
@@ -183,9 +210,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 Structures
               </Link>
               <Link
-                href="/dashboard/utilisateurs"
+                href="/admin/dashboard/utilisateurs"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname === "/dashboard/utilisateurs"
+                  pathname === "/admin/dashboard/utilisateurs"
                     ? "bg-bleu-rdc text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
@@ -193,9 +220,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 Utilisateurs
               </Link>
               <Link
-                href="/dashboard/parametres"
+                href="/admin/dashboard/parametres"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/parametres")
+                  pathname.startsWith("/admin/dashboard/parametres")
                     ? "bg-bleu-rdc text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
@@ -376,25 +403,27 @@ function SidebarContent({
 
 function getPageTitle(pathname: string): string {
   const titles: { [key: string]: string } = {
-    "/dashboard": "Tableau de bord",
-    "/dashboard/referentiel": "Références",
-    "/dashboard/referentiel/axes": "Axes Stratégiques",
-    "/dashboard/referentiel/indicateurs": "Indicateurs",
-    "/dashboard/referentiel/grandes-categories": "Grandes Catégories",
-    "/dashboard/referentiel/categories": "Catégories",
-    "/dashboard/referentiel/cibles": "Cibles",
-    "/dashboard/referentiel/provinces": "Provinces",
-    "/dashboard/referentiel/sexe": "Sexe",
-    "/dashboard/donnees": "Données",
-    "/dashboard/donnees/data-numeric": "Données Numériques",
-    "/dashboard/donnees/data-liste": "Données Liste",
-    "/dashboard/donnees/data-province": "Données Province",
-    "/dashboard/structures": "Structures",
-    "/dashboard/utilisateurs": "Utilisateurs",
-    "/dashboard/parametres": "Paramètres",
-    "/dashboard/parametres/configuration": "Configuration",
-    "/dashboard/parametres/about": "À propos",
-    "/dashboard/parametres/contact": "Contact",
+    "/admin/dashboard": "Tableau de bord",
+    "/admin/dashboard/referentiel": "Références",
+    "/admin/dashboard/referentiel/axes": "Axes Stratégiques",
+    "/admin/dashboard/referentiel/indicateurs": "Indicateurs",
+    "/admin/dashboard/referentiel/grandes-categories": "Grandes Catégories",
+    "/admin/dashboard/referentiel/categories": "Catégories",
+    "/admin/dashboard/referentiel/cibles": "Cibles",
+    "/admin/dashboard/referentiel/provinces": "Provinces",
+    "/admin/dashboard/referentiel/sexe": "Sexe",
+    "/admin/dashboard/referentiel/type": "Type",
+    "/admin/dashboard/referentiel/annees": "Années",
+    "/admin/dashboard/donnees": "Données",
+    "/admin/dashboard/donnees/data-numeric": "Données Numériques",
+    "/admin/dashboard/donnees/data-liste": "Données Liste",
+    "/admin/dashboard/donnees/data-province": "Données Province",
+    "/admin/dashboard/structures": "Structures",
+    "/admin/dashboard/utilisateurs": "Utilisateurs",
+    "/admin/dashboard/parametres": "Paramètres",
+    "/admin/dashboard/parametres/configuration": "Configuration",
+    "/admin/dashboard/parametres/about": "À propos",
+    "/admin/dashboard/parametres/contact": "Contact",
   };
 
   return titles[pathname] || "Administration";
