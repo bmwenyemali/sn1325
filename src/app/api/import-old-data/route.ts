@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "../../../../auth";
 import { importAllOldData } from "@/scripts/importOldData";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     // Vérifier l'authentification
     const session = await auth();
@@ -21,9 +21,14 @@ export async function POST() {
       );
     }
 
+    // Récupérer les options depuis le body
+    const body = await request.json().catch(() => ({}));
+    const clearExisting = body.clearExisting === true;
+
     // Lancer l'import
     console.log("🚀 Démarrage de l'import des données par", session.user.email);
-    const result = await importAllOldData();
+    console.log("   Options: clearExisting =", clearExisting);
+    const result = await importAllOldData(clearExisting);
 
     return NextResponse.json({
       success: true,

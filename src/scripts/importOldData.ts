@@ -55,14 +55,19 @@ async function importAxes() {
   const axes = readJsonFile("All-Axes.json");
 
   for (const axe of axes) {
-    const newAxe = await Axe.create({
-      nom: axe.Nom,
-      description: axe.Nom,
-      ordre: axe.ID,
-      actif: true,
-    });
-    idMaps.axes.set(axe.ID, newAxe._id.toString());
-    console.log(`  ✓ Axe créé: ${axe.Nom}`);
+    // Utiliser findOneAndUpdate avec upsert pour éviter les doublons
+    const result = await Axe.findOneAndUpdate(
+      { nom: axe.Nom }, // Critère de recherche
+      {
+        nom: axe.Nom,
+        description: axe.Nom,
+        ordre: axe.ID,
+        actif: true,
+      },
+      { upsert: true, new: true } // Créer si n'existe pas, retourner le nouveau doc
+    );
+    idMaps.axes.set(axe.ID, result._id.toString());
+    console.log(`  ✓ Axe créé/mis à jour: ${axe.Nom}`);
   }
   console.log(`✅ ${axes.length} axes importés`);
 }
@@ -72,12 +77,16 @@ async function importGrandesCategories() {
   const grandesCategories = readJsonFile("All-Grande-Categories.json");
 
   for (const gc of grandesCategories) {
-    const newGC = await GrandeCategorie.create({
-      nom: gc.Nom,
-      ordre: gc.ID,
-    });
-    idMaps.grandesCategories.set(gc.ID, newGC._id.toString());
-    console.log(`  ✓ Grande Catégorie créée: ${gc.Nom}`);
+    const result = await GrandeCategorie.findOneAndUpdate(
+      { nom: gc.Nom },
+      {
+        nom: gc.Nom,
+        ordre: gc.ID,
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.grandesCategories.set(gc.ID, result._id.toString());
+    console.log(`  ✓ Grande Catégorie créée/mise à jour: ${gc.Nom}`);
   }
   console.log(`✅ ${grandesCategories.length} grandes catégories importées`);
 }
@@ -93,13 +102,17 @@ async function importCategories() {
       continue;
     }
 
-    const newCat = await Categorie.create({
-      nom: cat.Nom,
-      grandeCategorie: grandeCategorieId,
-      ordre: cat.ID,
-    });
-    idMaps.categories.set(cat.ID, newCat._id.toString());
-    console.log(`  ✓ Catégorie créée: ${cat.Nom}`);
+    const result = await Categorie.findOneAndUpdate(
+      { nom: cat.Nom },
+      {
+        nom: cat.Nom,
+        grandeCategorie: grandeCategorieId,
+        ordre: cat.ID,
+      },
+      { upsert: true, new: true }
+    );
+    idMaps.categories.set(cat.ID, result._id.toString());
+    console.log(`  ✓ Catégorie créée/mise à jour: ${cat.Nom}`);
   }
   console.log(`✅ ${categories.length} catégories importées`);
 }
@@ -367,10 +380,30 @@ async function createUserBen() {
   console.log("✅ Utilisateur ben@gmail.com créé (mot de passe: 12345)");
 }
 
-export async function importAllOldData() {
+export async function importAllOldData(clearExisting = false) {
   try {
     await connectDB();
     console.log("🚀 Démarrage de l'import des données...\n");
+
+    // Option: Supprimer les données existantes
+    if (clearExisting) {
+      console.log("🗑️  Suppression des données existantes...");
+      await Promise.all([
+        Axe.deleteMany({}),
+        GrandeCategorie.deleteMany({}),
+        Categorie.deleteMany({}),
+        Cible.deleteMany({}),
+        Province.deleteMany({}),
+        Annee.deleteMany({}),
+        Structure.deleteMany({}),
+        TypeLMA.deleteMany({}),
+        LoisMesuresActions.deleteMany({}),
+        Indicateur.deleteMany({}),
+        DataNumeric.deleteMany({}),
+        DataQualitative.deleteMany({}),
+      ]);
+      console.log("✅ Données existantes supprimées\n");
+    }
 
     // Import dans l'ordre des dépendances
     await importAxes();

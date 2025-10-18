@@ -9,6 +9,7 @@ export default function AdminImportPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [clearExisting, setClearExisting] = useState(false);
   const [result, setResult] = useState<{
     success?: boolean;
     message?: string;
@@ -77,6 +78,7 @@ export default function AdminImportPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ clearExisting }),
       });
 
       const data = await response.json();
@@ -148,6 +150,29 @@ export default function AdminImportPage() {
               <li>• Les doublons seront automatiquement ignorés</li>
             </ul>
           </div>
+        </div>
+
+        {/* Import Options */}
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg mb-6">
+          <label className="flex items-start space-x-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={clearExisting}
+              onChange={(e) => setClearExisting(e.target.checked)}
+              className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <div className="flex-1">
+              <div className="font-medium text-gray-900 dark:text-white">
+                Supprimer les données existantes avant l&apos;import
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                ⚠️ Attention: Cette option supprimera TOUTES les données
+                existantes dans la base de données avant d&apos;importer les
+                nouvelles données. Utilisez cette option si vous rencontrez des
+                erreurs de doublons (E11000).
+              </div>
+            </div>
+          </label>
         </div>
 
         {/* Import Button */}

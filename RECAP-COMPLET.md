@@ -3,16 +3,19 @@
 ## 📋 Les 3 Problèmes Successifs
 
 ### Problème 1: "Accès Refusé" même en admin ✅ RÉSOLU
+
 - **Cause**: Role était un ObjectId, pas le code "ADMIN"
 - **Solution**: Ajout de `.populate("role")` dans auth.ts
 - **Commit**: 9867341
 
 ### Problème 2: Erreur 401 dans Postman ✅ RÉSOLU
+
 - **Cause**: Cookies HTTP-only non envoyés
 - **Solution**: Guide d'authentification Postman créé
 - **Commit**: 9867341
 
 ### Problème 3: ENOENT - Fichiers manquants ✅ RÉSOLU
+
 - **Cause**: Dossier OldData hors du projet (pas déployé)
 - **Solution**: Copie de OldData/ dans sn1325-app/
 - **Commit**: 020b48e
@@ -24,6 +27,7 @@
 ### 1. Authentification Admin Corrigée
 
 **Fichiers modifiés**:
+
 - `auth.ts` - Populate role + extraction code
 - `src/types/next-auth.d.ts` - Type string pour role
 - `src/app/dashboard/admin/import/page.tsx` - Vérification simplifiée
@@ -31,19 +35,21 @@
 - `src/app/dashboard/utilisateurs/page.tsx` - Vérification simplifiée
 
 **Code clé**:
+
 ```typescript
 // Avant: ❌
 const user = await User.findOne({ email });
-role: user.role.toString() // Retourne ObjectId string
+role: user.role.toString(); // Retourne ObjectId string
 
 // Après: ✅
 const user = await User.findOne({ email }).populate("role");
-role: (user.role as Record<string, unknown>).code // Retourne "ADMIN"
+role: (user.role as Record<string, unknown>).code; // Retourne "ADMIN"
 ```
 
 ### 2. Fichiers OldData Ajoutés
 
 **Fichiers ajoutés** (12 fichiers JSON, 16.38 KB):
+
 ```
 sn1325-app/OldData/
 ├── All-Axes.json
@@ -61,6 +67,7 @@ sn1325-app/OldData/
 ```
 
 **Commande**:
+
 ```bash
 cp -r "../OldData" ./OldData
 git add OldData/
@@ -81,16 +88,19 @@ git push origin master
 ## 🚀 Déploiement
 
 ### Commits Git:
+
 1. ✅ `9867341` - Authentification admin + guide Postman
 2. ✅ `020b48e` - Fichiers OldData ajoutés
 
 ### Vercel:
+
 - ✅ Push vers GitHub master
 - 🟡 Déploiement automatique en cours
 - ⏳ **Attendez 2-3 minutes**
 - 🎯 URL: https://sn1325.vercel.app
 
 ### Build Info:
+
 - ✅ 16 routes compilées
 - ✅ Aucune erreur TypeScript
 - ✅ Aucune erreur ESLint
@@ -101,6 +111,7 @@ git push origin master
 ## 🧪 Comment Tester (Dans 2-3 Minutes)
 
 ### Étape 1: Vérifier Vercel
+
 - Allez sur: https://vercel.com/bmwenyemalis-projects/sn1325/deployments
 - Attendez que le statut soit "Ready" ✅
 
@@ -109,10 +120,12 @@ git push origin master
 1. **Ouvrez**: https://sn1325.vercel.app/dashboard/admin/import
 
 2. **Connectez-vous**:
+
    - Email: `admin@sn1325.cd`
    - Mot de passe: `admin123`
 
 3. **Vérifications avant import**:
+
    - ✅ Pas de "Accès Refusé"
    - ✅ Bouton bleu "Lancer l'Import" visible
    - ✅ Informations sur l'import affichées
@@ -120,13 +133,15 @@ git push origin master
 4. **Cliquez sur "Lancer l'Import"**
 
 5. **Attendez 2-5 minutes**:
+
    - Animation de chargement
    - NE FERMEZ PAS LA PAGE
 
 6. **Résultat attendu**:
+
    ```
    ✅ Import Réussi!
-   
+
    Détails:
    • 6 axes importés
    • 11 grandes catégories importées
@@ -150,6 +165,7 @@ git push origin master
 ## 📊 Ce Qui Est Importé
 
 ### Référentiels:
+
 - ✅ 6 Axes stratégiques (ODD, Paix, etc.)
 - ✅ 11 Grandes Catégories
 - ✅ 19 Catégories
@@ -159,20 +175,24 @@ git push origin master
 - ✅ Structures/Organisations
 
 ### Indicateurs:
+
 - ✅ ~40 Indicateurs
   - Numériques (désagrégation: sexe, province, année)
   - Qualitatifs (listes dynamiques)
 
 ### Données:
+
 - ✅ Données numériques désagrégées
 - ✅ Données qualitatives (listes)
 - ✅ Données provinciales
 
 ### Lois/Mesures/Actions:
+
 - ✅ Types LMA
 - ✅ Lois, Mesures, Mécanismes, Actions
 
 ### Utilisateur Test:
+
 - ✅ ben@gmail.com (pwd: 12345)
 - ✅ Rôle: USER (lecture seule)
 
@@ -183,12 +203,14 @@ git push origin master
 Si l'import prend trop de temps (>10s timeout Vercel), utilisez la méthode locale:
 
 ### Option 1: Via l'App Locale
+
 ```bash
 npm run dev
 # Puis: http://localhost:3000/dashboard/admin/import
 ```
 
 ### Option 2: Script Direct
+
 ```bash
 npx ts-node src/scripts/importOldData.ts
 ```
@@ -239,6 +261,7 @@ sn1325-app/
 ## ✅ Checklist Finale
 
 ### Développement:
+
 - [x] Script d'import créé (importOldData.ts)
 - [x] API endpoint créée (/api/import-old-data)
 - [x] Page web d'import créée (/dashboard/admin/import)
@@ -248,18 +271,21 @@ sn1325-app/
 - [x] Build réussi (16 routes)
 
 ### Documentation:
+
 - [x] Guide Postman détaillé
 - [x] Guide des corrections
 - [x] Guide de test
 - [x] Récapitulatif complet
 
 ### Git & Déploiement:
+
 - [x] Commit auth corrections (9867341)
 - [x] Commit fichiers OldData (020b48e)
 - [x] Push vers GitHub master
 - [x] Déploiement Vercel déclenché
 
 ### Tests (À faire):
+
 - [ ] Attendre déploiement Vercel (2-3 min)
 - [ ] Tester page d'import
 - [ ] Lancer l'import
@@ -273,20 +299,24 @@ sn1325-app/
 Après l'import réussi:
 
 1. **Corriger light mode globalement** (todo #2)
+
    - Fixer textes blancs sur fond blanc
    - Corriger dropdowns illisibles
 
 2. **Créer pages de visualisation** (todo #8)
+
    - /dashboard/donnees/consultation
    - /dashboard/rapports/analyses
    - Graphiques et tableaux
 
 3. **Créer pages CRUD admin** (todo #8)
+
    - Gérer axes, catégories, cibles
    - Gérer indicateurs
    - Saisir données
 
 4. **Redesign page À Propos** (todo #5)
+
    - Couleurs ministère adoucies
    - Logos en bas des cartes
 
@@ -298,12 +328,14 @@ Après l'import réussi:
 ## 🎉 Résumé
 
 ### Avant:
+
 - ❌ Accès refusé page admin
 - ❌ Erreur 401 Postman
 - ❌ Fichiers OldData manquants
 - ❌ Import impossible
 
 ### Maintenant:
+
 - ✅ Authentification admin fonctionnelle
 - ✅ Page d'import créée et accessible
 - ✅ Fichiers OldData dans le projet
