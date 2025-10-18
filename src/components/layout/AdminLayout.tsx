@@ -126,52 +126,110 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-80 flex flex-col flex-1">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 lg:mx-auto lg:max-w-none">
-          <div className="flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 lg:mx-auto lg:max-w-none bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+          {/* Mobile header */}
+          <div className="flex h-16 items-center gap-x-4 px-4 sm:px-6 lg:px-8 lg:hidden">
             <button
               type="button"
-              className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+              className="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-6 w-6" />
             </button>
-
-            <div className="h-6 w-px bg-gray-200 lg:hidden" />
-
-            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-              <div className="flex items-center gap-x-4 lg:gap-x-6">
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {getPageTitle(pathname)}
-                </h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {getPageTitle(pathname)}
+            </h1>
+            <div className="ml-auto flex items-center space-x-3">
+              <div className="h-8 w-8 rounded-full bg-bleu-rdc flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {session?.user?.prenom?.charAt(0)}
+                  {session?.user?.nom?.charAt(0)}
+                </span>
               </div>
+            </div>
+          </div>
 
-              <div className="ml-auto flex items-center gap-x-4 lg:gap-x-6">
-                {/* Notifications */}
-                <button className="relative p-2 text-gray-400 hover:text-gray-500">
-                  <Bell className="h-6 w-6" />
-                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-                </button>
+          {/* Desktop horizontal menu */}
+          <div className="hidden lg:flex items-center justify-between px-6 h-16">
+            <nav className="flex space-x-1">
+              <Link
+                href="/dashboard/donnees"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/donnees")
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Données
+              </Link>
+              <Link
+                href="/dashboard/referentiel"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/referentiel")
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Références
+              </Link>
+              <Link
+                href="/dashboard/structures"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === "/dashboard/structures"
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Structures
+              </Link>
+              <Link
+                href="/dashboard/utilisateurs"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === "/dashboard/utilisateurs"
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Utilisateurs
+              </Link>
+              <Link
+                href="/dashboard/parametres"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/parametres")
+                    ? "bg-bleu-rdc text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                Paramètres
+              </Link>
+            </nav>
 
-                {/* Profile dropdown */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-bleu-rdc flex items-center justify-center">
-                      <span className="text-sm font-medium text-white">
-                        {session?.user?.prenom?.charAt(0)}
-                        {session?.user?.nom?.charAt(0)}
-                      </span>
-                    </div>
+            <div className="flex items-center gap-x-4">
+              {/* Notifications */}
+              <button className="relative p-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white dark:ring-slate-900" />
+              </button>
+
+              {/* Profile */}
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-bleu-rdc flex items-center justify-center">
+                    <span className="text-sm font-medium text-white">
+                      {session?.user?.prenom?.charAt(0)}
+                      {session?.user?.nom?.charAt(0)}
+                    </span>
                   </div>
-                  <div className="hidden md:block">
-                    <div className="text-sm font-medium text-gray-700">
-                      {session?.user?.prenom} {session?.user?.nom}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {session?.user?.fonction}
-                    </div>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {session?.user?.prenom} {session?.user?.nom}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {session?.user?.fonction}
+                  </div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           </div>
