@@ -3,14 +3,19 @@
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Search, BarChart } from "lucide-react";
 
+interface Axe {
+  _id: string;
+  nom: string;
+  couleur: string;
+}
+
 interface Indicateur {
   _id: string;
   nom: string;
   code: string;
   description: string;
   type: "quantitatif" | "qualitatif";
-  axeId: string;
-  axeNom: string;
+  axe: Axe | string;
   unitesMesure: string[];
   frequenceCollecte:
     | "mensuelle"
@@ -24,6 +29,7 @@ interface Indicateur {
 
 export default function IndicateursPage() {
   const [indicateurs, setIndicateurs] = useState<Indicateur[]>([]);
+  const [axes, setAxes] = useState<Axe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAxe, setFilterAxe] = useState("");
@@ -37,7 +43,7 @@ export default function IndicateursPage() {
     code: "",
     description: "",
     type: "quantitatif" as "quantitatif" | "qualitatif",
-    axeId: "",
+    axe: "",
     unitesMesure: [""],
     frequenceCollecte: "trimestrielle" as
       | "mensuelle"
@@ -47,70 +53,25 @@ export default function IndicateursPage() {
     statut: "actif" as "actif" | "inactif",
   });
 
-  const axes = [
-    { _id: "1", nom: "Participation" },
-    { _id: "2", nom: "Protection" },
-    { _id: "3", nom: "Prévention" },
-    { _id: "4", nom: "Relèvement" },
-    { _id: "5", nom: "Coordination" },
-  ];
-
   useEffect(() => {
-    fetchIndicateurs();
+    fetchData();
   }, []);
 
-  const fetchIndicateurs = async () => {
+  const fetchData = async () => {
     try {
-      // Simulated data - replace with actual API call
-      const mockIndicateurs: Indicateur[] = [
-        {
-          _id: "1",
-          nom: "Pourcentage de femmes au Parlement",
-          code: "PART_001",
-          description: "Pourcentage de femmes députées à l'Assemblée Nationale",
-          type: "quantitatif",
-          axeId: "1",
-          axeNom: "Participation",
-          unitesMesure: ["%"],
-          frequenceCollecte: "annuelle",
-          statut: "actif",
-          dateCreation: new Date("2025-01-01"),
-          dateModification: new Date("2025-01-15"),
-        },
-        {
-          _id: "2",
-          nom: "Nombre de violences signalées",
-          code: "PROT_001",
-          description:
-            "Nombre de cas de violences basées sur le genre signalés",
-          type: "quantitatif",
-          axeId: "2",
-          axeNom: "Protection",
-          unitesMesure: ["nombre", "cas"],
-          frequenceCollecte: "mensuelle",
-          statut: "actif",
-          dateCreation: new Date("2025-01-02"),
-          dateModification: new Date("2025-01-10"),
-        },
-        {
-          _id: "3",
-          nom: "Évaluation des mécanismes d'alerte précoce",
-          code: "PREV_001",
-          description:
-            "Évaluation qualitative de l'efficacité des mécanismes d'alerte précoce",
-          type: "qualitatif",
-          axeId: "3",
-          axeNom: "Prévention",
-          unitesMesure: ["échelle 1-5", "appréciation"],
-          frequenceCollecte: "semestrielle",
-          statut: "actif",
-          dateCreation: new Date("2025-01-03"),
-          dateModification: new Date("2025-01-08"),
-        },
-      ];
-      setIndicateurs(mockIndicateurs);
+      // Fetch axes
+      const axesRes = await fetch("/api/axes");
+      const axesData = await axesRes.json();
+      if (axesData.success) setAxes(axesData.data);
+
+      // Fetch indicateurs
+      const res = await fetch("/api/indicateurs");
+      const data = await res.json();
+      if (data.success) {
+        setIndicateurs(data.data);
+      }
     } catch (error) {
-      console.error("Erreur lors du chargement des indicateurs:", error);
+      console.error("Erreur lors du chargement:", error);
     } finally {
       setLoading(false);
     }
@@ -119,36 +80,28 @@ export default function IndicateursPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const axeNom = axes.find((axe) => axe._id === formData.axeId)?.nom || "";
+      const method = editingIndicateur ? "PATCH" : "POST";
+      const url = editingIndicateur
+        ? `/api/indicateurs/${editingIndicateur._id}`
+        : "/api/indicateurs";
 
-      if (editingIndicateur) {
-        // Update existing indicateur
-        const updatedIndicateur = {
-          ...editingIndicateur,
-          ...formData,
-          axeNom,
-          dateModification: new Date(),
-        };
-        setIndicateurs(
-          indicateurs.map((ind) =>
-            ind._id === editingIndicateur._id ? updatedIndicateur : ind
-          )
-        );
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await fetchData();
+        resetForm();
       } else {
-        // Create new indicateur
-        const newIndicateur: Indicateur = {
-          _id: Date.now().toString(),
-          ...formData,
-          axeNom,
-          dateCreation: new Date(),
-          dateModification: new Date(),
-        };
-        setIndicateurs([...indicateurs, newIndicateur]);
+        alert("Erreur: " + result.error);
       }
-
-      resetForm();
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
+      console.error("Erreur:", error);
+      alert("Erreur lors de la sauvegarde");
     }
   };
 
@@ -159,7 +112,10 @@ export default function IndicateursPage() {
       code: indicateur.code,
       description: indicateur.description,
       type: indicateur.type,
-      axeId: indicateur.axeId,
+      axe:
+        typeof indicateur.axe === "object"
+          ? indicateur.axe._id
+          : indicateur.axe,
       unitesMesure: indicateur.unitesMesure,
       frequenceCollecte: indicateur.frequenceCollecte,
       statut: indicateur.statut,
@@ -170,9 +126,20 @@ export default function IndicateursPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer cet indicateur ?")) {
       try {
-        setIndicateurs(indicateurs.filter((ind) => ind._id !== id));
+        const response = await fetch(`/api/indicateurs/${id}`, {
+          method: "DELETE",
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          await fetchData();
+        } else {
+          alert("Erreur: " + result.error);
+        }
       } catch (error) {
-        console.error("Erreur lors de la suppression:", error);
+        console.error("Erreur:", error);
+        alert("Erreur lors de la suppression");
       }
     }
   };
@@ -183,7 +150,7 @@ export default function IndicateursPage() {
       code: "",
       description: "",
       type: "quantitatif",
-      axeId: "",
+      axe: "",
       unitesMesure: [""],
       frequenceCollecte: "trimestrielle",
       statut: "actif",
@@ -220,7 +187,9 @@ export default function IndicateursPage() {
       indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       indicateur.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       indicateur.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAxe = !filterAxe || indicateur.axeId === filterAxe;
+    const axeId =
+      typeof indicateur.axe === "object" ? indicateur.axe._id : indicateur.axe;
+    const matchesAxe = !filterAxe || axeId === filterAxe;
     const matchesType = !filterType || indicateur.type === filterType;
 
     return matchesSearch && matchesAxe && matchesType;
@@ -347,7 +316,9 @@ export default function IndicateursPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {indicateur.axeNom}
+                      {typeof indicateur.axe === "object"
+                        ? indicateur.axe.nom
+                        : "N/A"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -475,11 +446,11 @@ export default function IndicateursPage() {
                   </label>
                   <select
                     required
-                    value={formData.axeId}
+                    value={formData.axe}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        axeId: e.target.value,
+                        axe: e.target.value,
                       }))
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bleu-rdc focus:border-transparent"

@@ -281,3 +281,15 @@ body {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+
+/* Fix select dropdowns in dark mode */
+.dark select option {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+.dark select {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  border-color: #475569;
+}

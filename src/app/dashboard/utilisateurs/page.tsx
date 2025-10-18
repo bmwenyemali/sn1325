@@ -5,16 +5,21 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Plus, Edit2, Trash2, Search, UserCheck, UserX } from "lucide-react";
 
+interface Province {
+  _id: string;
+  nom: string;
+}
+
 interface User {
   _id: string;
   nom: string;
   prenom: string;
   email: string;
-  role: { nom: string; code: string };
-  province?: { nom: string };
-  fonction: string;
-  organisation: string;
-  statut: string;
+  role: "ADMIN" | "USER" | "VIEWER";
+  province?: Province;
+  fonction?: string;
+  organisation?: string;
+  statut: "actif" | "inactif";
 }
 
 export default function UsersManagementPage() {
@@ -39,33 +44,11 @@ export default function UsersManagementPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // TODO: Implement API call to fetch users
-      // For now, using mock data
-      const mockUsers: User[] = [
-        {
-          _id: "1",
-          nom: "Admin",
-          prenom: "Système",
-          email: "admin@sn1325.cd",
-          role: { nom: "Administrateur", code: "ADMIN" },
-          province: { nom: "Kinshasa" },
-          fonction: "Administrateur Système",
-          organisation: "Secrétariat National 1325",
-          statut: "actif",
-        },
-        {
-          _id: "2",
-          nom: "Mukendi",
-          prenom: "Jean",
-          email: "user@sn1325.cd",
-          role: { nom: "Utilisateur", code: "USER" },
-          province: { nom: "Nord-Kivu" },
-          fonction: "Analyste",
-          organisation: "Ministère du Genre",
-          statut: "actif",
-        },
-      ];
-      setUsers(mockUsers);
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      if (data.success) {
+        setUsers(data.data);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -78,7 +61,8 @@ export default function UsersManagementPage() {
       user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.organisation.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.organisation &&
+        user.organisation.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       filterStatus === "all" || user.statut === filterStatus;
@@ -196,12 +180,14 @@ export default function UsersManagementPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.role.code === "ADMIN"
+                          user.role === "ADMIN"
                             ? "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
-                            : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                            : user.role === "USER"
+                            ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                         }`}
                       >
-                        {user.role.nom}
+                        {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -292,7 +278,7 @@ export default function UsersManagementPage() {
                 Administrateurs
               </p>
               <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
-                {users.filter((u) => u.role.code === "ADMIN").length}
+                {users.filter((u) => u.role === "ADMIN").length}
               </p>
             </div>
             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">

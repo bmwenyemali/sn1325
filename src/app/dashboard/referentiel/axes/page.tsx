@@ -34,41 +34,14 @@ export default function AxesPage() {
 
   const fetchAxes = async () => {
     try {
-      // Simulated data - replace with actual API call
-      const mockAxes: Axe[] = [
-        {
-          _id: "1",
-          nom: "Participation",
-          description:
-            "Participation des femmes aux processus de paix et de prise de décision",
-          couleur: "#002B7F",
-          ordre: 1,
-          dateCreation: new Date("2025-01-01"),
-          dateModification: new Date("2025-01-15"),
-          statut: "actif",
-        },
-        {
-          _id: "2",
-          nom: "Protection",
-          description: "Protection des droits des femmes et des filles",
-          couleur: "#FCD116",
-          ordre: 2,
-          dateCreation: new Date("2025-01-01"),
-          dateModification: new Date("2025-01-10"),
-          statut: "actif",
-        },
-        {
-          _id: "3",
-          nom: "Prévention",
-          description: "Prévention des violences et des conflits",
-          couleur: "#CE1126",
-          ordre: 3,
-          dateCreation: new Date("2025-01-01"),
-          dateModification: new Date("2025-01-08"),
-          statut: "actif",
-        },
-      ];
-      setAxes(mockAxes);
+      const response = await fetch("/api/axes");
+      const result = await response.json();
+
+      if (result.success) {
+        setAxes(result.data);
+      } else {
+        console.error("Erreur lors du chargement:", result.error);
+      }
     } catch (error) {
       console.error("Erreur lors du chargement des axes:", error);
     } finally {
@@ -79,30 +52,28 @@ export default function AxesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingAxe) {
-        // Update existing axe
-        const updatedAxe = {
-          ...editingAxe,
-          ...formData,
-          dateModification: new Date(),
-        };
-        setAxes(
-          axes.map((axe) => (axe._id === editingAxe._id ? updatedAxe : axe))
-        );
-      } else {
-        // Create new axe
-        const newAxe: Axe = {
-          _id: Date.now().toString(),
-          ...formData,
-          dateCreation: new Date(),
-          dateModification: new Date(),
-        };
-        setAxes([...axes, newAxe]);
-      }
+      const method = editingAxe ? "PATCH" : "POST";
+      const url = editingAxe ? `/api/axes/${editingAxe._id}` : "/api/axes";
 
-      resetForm();
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Refresh the list
+        await fetchAxes();
+        resetForm();
+      } else {
+        console.error("Erreur lors de la sauvegarde:", result.error);
+        alert("Erreur: " + result.error);
+      }
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
+      alert("Erreur lors de la sauvegarde");
     }
   };
 
@@ -121,9 +92,22 @@ export default function AxesPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer cet axe ?")) {
       try {
-        setAxes(axes.filter((axe) => axe._id !== id));
+        const response = await fetch(`/api/axes/${id}`, {
+          method: "DELETE",
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Refresh the list
+          await fetchAxes();
+        } else {
+          console.error("Erreur lors de la suppression:", result.error);
+          alert("Erreur: " + result.error);
+        }
       } catch (error) {
         console.error("Erreur lors de la suppression:", error);
+        alert("Erreur lors de la suppression");
       }
     }
   };
@@ -258,8 +242,12 @@ export default function AxesPage() {
                       {axe.statut === "actif" ? "Actif" : "Inactif"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {axe.dateModification.toLocaleDateString("fr-FR")}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {axe.dateModification
+                      ? new Date(axe.dateModification).toLocaleDateString(
+                          "fr-FR"
+                        )
+                      : "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">

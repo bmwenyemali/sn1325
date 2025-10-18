@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -55,15 +56,17 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/LogoSN1325.png" type="image/png" />
       </head>
-      <body className="bg-gray-50 font-sans">
+      <body className="bg-gray-50 dark:bg-gray-900 font-sans transition-colors">
         <SessionProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <ThemeProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </ThemeProvider>
         </SessionProvider>
       </body>
     </html>

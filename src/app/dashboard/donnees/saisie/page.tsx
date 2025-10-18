@@ -25,7 +25,7 @@ interface Indicateur {
   nom: string;
   code: string;
   type: "quantitatif" | "qualitatif";
-  axeId: string;
+  axe: string | { _id: string; nom: string };
   unitesMesure: string[];
 }
 
@@ -77,7 +77,10 @@ export default function SaisiePage() {
 
   useEffect(() => {
     if (selectedAxe) {
-      const filtered = indicateurs.filter((ind) => ind.axeId === selectedAxe);
+      const filtered = indicateurs.filter((ind) => {
+        const axeId = typeof ind.axe === "object" ? ind.axe._id : ind.axe;
+        return axeId === selectedAxe;
+      });
       setFilteredIndicateurs(filtered);
       // Initialize data values for filtered indicators
       const initialValues = filtered.map((ind) => ({
@@ -96,52 +99,20 @@ export default function SaisiePage() {
 
   const fetchData = async () => {
     try {
-      // Simulated data - replace with actual API calls
-      const mockProvinces: Province[] = [
-        { _id: "1", nom: "Kinshasa", code: "KIN" },
-        { _id: "2", nom: "Nord-Kivu", code: "NK" },
-        { _id: "3", nom: "Sud-Kivu", code: "SK" },
-        { _id: "4", nom: "Haut-Katanga", code: "HK" },
-      ];
+      // Fetch provinces
+      const provincesRes = await fetch("/api/provinces");
+      const provincesData = await provincesRes.json();
+      if (provincesData.success) setProvinces(provincesData.data);
 
-      const mockAxes: Axe[] = [
-        { _id: "1", nom: "Participation" },
-        { _id: "2", nom: "Protection" },
-        { _id: "3", nom: "Prévention" },
-        { _id: "4", nom: "Relèvement" },
-        { _id: "5", nom: "Coordination" },
-      ];
+      // Fetch axes
+      const axesRes = await fetch("/api/axes");
+      const axesData = await axesRes.json();
+      if (axesData.success) setAxes(axesData.data);
 
-      const mockIndicateurs: Indicateur[] = [
-        {
-          _id: "1",
-          nom: "Pourcentage de femmes au Parlement",
-          code: "PART_001",
-          type: "quantitatif",
-          axeId: "1",
-          unitesMesure: ["%"],
-        },
-        {
-          _id: "2",
-          nom: "Nombre de femmes dans les postes de direction",
-          code: "PART_002",
-          type: "quantitatif",
-          axeId: "1",
-          unitesMesure: ["nombre"],
-        },
-        {
-          _id: "3",
-          nom: "Évaluation de la participation aux processus de paix",
-          code: "PART_003",
-          type: "qualitatif",
-          axeId: "1",
-          unitesMesure: ["échelle 1-5", "appréciation"],
-        },
-      ];
-
-      setProvinces(mockProvinces);
-      setAxes(mockAxes);
-      setIndicateurs(mockIndicateurs);
+      // Fetch indicateurs
+      const indicateursRes = await fetch("/api/indicateurs");
+      const indicateursData = await indicateursRes.json();
+      if (indicateursData.success) setIndicateurs(indicateursData.data);
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
     } finally {

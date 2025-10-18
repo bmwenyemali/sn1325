@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-bleu-rdc text-white">
+    <footer className="bg-bleu-rdc dark:bg-bleu-rdc text-white dark:text-white">
       <div className="container-rdc py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo et description */}
@@ -18,13 +18,13 @@ export function Footer() {
                 className="object-contain bg-white rounded-lg p-1"
               />
               <div>
-                <h3 className="text-xl font-bold">SN1325 RDC</h3>
-                <p className="text-blue-200 text-sm">
+                <h3 className="text-xl font-bold text-white">SN1325 RDC</h3>
+                <p className="text-blue-200 dark:text-blue-200 text-sm">
                   Secrétariat National 1325
                 </p>
               </div>
             </div>
-            <p className="text-blue-100 mb-4 leading-relaxed">
+            <p className="text-blue-100 dark:text-blue-100 mb-4 leading-relaxed">
               Application de monitoring de la Résolution 1325 du Conseil de
               Sécurité des Nations Unies sur les Femmes, la Paix et la Sécurité
               en République Démocratique du Congo.
