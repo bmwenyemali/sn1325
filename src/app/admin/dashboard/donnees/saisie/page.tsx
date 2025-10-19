@@ -85,7 +85,10 @@ export default function SaisiePage() {
       // Initialize data values for filtered indicators
       const initialValues = filtered.map((ind) => ({
         indicateurId: ind._id,
-        uniteMesure: ind.unitesMesure[0] || "",
+        uniteMesure:
+          ind.unitesMesure && ind.unitesMesure.length > 0
+            ? ind.unitesMesure[0]
+            : "",
         valeurNumerique: ind.type === "quantitatif" ? undefined : undefined,
         valeurTexte: ind.type === "qualitatif" ? "" : undefined,
         commentaire: "",

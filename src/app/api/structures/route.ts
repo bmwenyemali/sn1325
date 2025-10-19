@@ -15,12 +15,13 @@ export async function GET(request: NextRequest) {
 
     const query: Record<string, unknown> = {};
     if (type) query.type = type;
-    if (province) query.province = province;
+    if (province) query.provinces = province;
     if (axe) query.axes = axe;
 
     const structures = await Structure.find(query)
-      .populate("province")
-      .populate("axes")
+      .populate("provinces", "nom code")
+      .populate("axes", "nom numero")
+      .populate("cible", "nom numero")
       .sort({ nom: 1 });
 
     return NextResponse.json({ success: true, data: structures });

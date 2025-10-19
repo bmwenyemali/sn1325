@@ -1,19 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { Database, Filter, Search, Eye } from "lucide-react";
+import { Database, Filter, Search } from "lucide-react";
+import { useAxes, useIndicateurs } from "@/hooks/useApi";
+
+interface Axe {
+  _id: string;
+  nom: string;
+  numero: number;
+}
+
+interface Indicateur {
+  _id: string;
+  nom: string;
+  axe: Axe;
+  type: string;
+}
 
 export default function UserDonneesPage() {
+  const { data: axesData, loading: axesLoading } = useAxes();
+  const { data: indicateursData, loading: indicateursLoading } =
+    useIndicateurs();
   const [axeFilter, setAxeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // This will be replaced with actual API calls
-  const axes = [
-    { id: 1, nom: "Prévention" },
-    { id: 2, nom: "Participation" },
-    { id: 3, nom: "Protection" },
-    { id: 4, nom: "Secours et Relèvement" },
-  ];
+  const axes: Axe[] = axesData || [];
+  const indicateurs: Indicateur[] = indicateursData || [];
+  const loading = axesLoading || indicateursLoading;
+
+  const filteredIndicateurs = indicateurs.filter((ind) => {
+    const matchesSearch = ind.nom
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesAxe = axeFilter === "all" || ind.axe?._id === axeFilter;
+    return matchesSearch && matchesAxe;
+  });
+
+  // Group by axe
+  const groupedByAxe = axes
+    .map((axe) => ({
+      axe,
+      indicateurs: filteredIndicateurs.filter(
+        (ind) => ind.axe?._id === axe._id
+      ),
+    }))
+    .filter((group) => group.indicateurs.length > 0);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bleu-rdc"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -42,8 +81,8 @@ export default function UserDonneesPage() {
             >
               <option value="all">Tous les axes</option>
               {axes.map((axe) => (
-                <option key={axe.id} value={axe.id}>
-                  {axe.nom}
+                <option key={axe._id} value={axe._id}>
+                  Axe {axe.numero}: {axe.nom}
                 </option>
               ))}
             </select>
@@ -65,62 +104,76 @@ export default function UserDonneesPage() {
         </div>
       </div>
 
-      {/* Data Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-          <Database className="w-10 h-10 text-blue-500 mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Données Numériques
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
-            Données quantitatives et statistiques
-          </p>
-          <button className="flex items-center text-bleu-rdc dark:text-jaune-rdc font-semibold hover:underline">
-            <Eye className="w-4 h-4 mr-2" />
-            Consulter
-          </button>
+      {/* Statistics */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            {axes.length}
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Axes Stratégiques
+          </div>
         </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-          <Database className="w-10 h-10 text-green-500 mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Données Liste
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
-            Données qualitatives et descriptives
-          </p>
-          <button className="flex items-center text-bleu-rdc dark:text-jaune-rdc font-semibold hover:underline">
-            <Eye className="w-4 h-4 mr-2" />
-            Consulter
-          </button>
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            {indicateurs.length}
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Indicateurs Totaux
+          </div>
         </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-          <Database className="w-10 h-10 text-purple-500 mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Données Provinciales
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
-            Données agrégées par province
-          </p>
-          <button className="flex items-center text-bleu-rdc dark:text-jaune-rdc font-semibold hover:underline">
-            <Eye className="w-4 h-4 mr-2" />
-            Consulter
-          </button>
+        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            {filteredIndicateurs.length}
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Résultats Filtrés
+          </div>
         </div>
       </div>
 
-      {/* Placeholder for data display */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg text-center">
-        <Database className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Sélectionnez une catégorie
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Choisissez une catégorie de données ci-dessus pour commencer la
-          consultation
-        </p>
-      </div>
+      {/* Indicateurs by Axe */}
+      {groupedByAxe.length > 0 ? (
+        <div className="space-y-6">
+          {groupedByAxe.map(({ axe, indicateurs }) => (
+            <div
+              key={axe._id}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Axe {axe.numero}: {axe.nom}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {indicateurs.map((ind) => (
+                  <div
+                    key={ind._id}
+                    className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:border-bleu-rdc dark:hover:border-jaune-rdc transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white flex-1">
+                        {ind.nom}
+                      </h3>
+                      <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded">
+                        {ind.type}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 shadow-lg text-center">
+          <Database className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Aucune donnée trouvée
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Essayez de modifier vos filtres de recherche
+          </p>
+        </div>
+      )}
     </div>
   );
 }

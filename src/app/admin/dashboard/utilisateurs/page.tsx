@@ -15,7 +15,7 @@ interface User {
   nom: string;
   prenom: string;
   email: string;
-  role: "ADMIN" | "USER";
+  role: "ADMIN" | "VISITOR";
   province?: Province;
   fonction?: string;
   organisation?: string;
@@ -38,7 +38,7 @@ export default function UsersManagementPage() {
     prenom: "",
     email: "",
     password: "",
-    role: "USER" as "ADMIN" | "USER",
+    role: "VISITOR" as "ADMIN" | "VISITOR",
     province: "",
     fonction: "",
     organisation: "",
@@ -159,7 +159,7 @@ export default function UsersManagementPage() {
       prenom: "",
       email: "",
       password: "",
-      role: "USER",
+      role: "VISITOR",
       province: "",
       fonction: "",
       organisation: "",
@@ -301,7 +301,7 @@ export default function UsersManagementPage() {
                             : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                         }`}
                       >
-                        {user.role === "ADMIN" ? "Admin" : "Utilisateur"}
+                        {user.role === "ADMIN" ? "Admin" : "Visiteur"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -487,12 +487,12 @@ export default function UsersManagementPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        role: e.target.value as "ADMIN" | "USER",
+                        role: e.target.value as "ADMIN" | "VISITOR",
                       })
                     }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc dark:bg-gray-700 dark:text-white"
                   >
-                    <option value="USER">Utilisateur</option>
+                    <option value="VISITOR">Visiteur</option>
                     <option value="ADMIN">Administrateur</option>
                   </select>
                 </div>

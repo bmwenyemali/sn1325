@@ -3,8 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Users, BarChart3, FileText } from "lucide-react";
-import { useSession } from "next-auth/react";
+import {
+  Menu,
+  X,
+  Users,
+  BarChart3,
+  FileText,
+  Home,
+  Database,
+  BookOpen,
+  Building2,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export function Header() {
@@ -40,6 +52,89 @@ export function Header() {
 
           {/* Navigation desktop */}
           <nav className="hidden md:flex items-center space-x-6">
+            {/* Admin Menu */}
+            {session?.user?.role === "ADMIN" && (
+              <>
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>TB</span>
+                </Link>
+                <Link
+                  href="/admin/dashboard/donnees/saisie"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Database className="w-4 h-4" />
+                  <span>Données</span>
+                </Link>
+                <Link
+                  href="/admin/dashboard/referentiel"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Références</span>
+                </Link>
+                <Link
+                  href="/admin/dashboard/structures"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Structures</span>
+                </Link>
+                <Link
+                  href="/admin/dashboard/utilisateurs"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Users</span>
+                </Link>
+                <Link
+                  href="/admin/dashboard/parametres"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Paramètres</span>
+                </Link>
+              </>
+            )}
+
+            {/* Visitor Menu */}
+            {session?.user?.role === "VISITOR" && (
+              <>
+                <Link
+                  href="/user/dashboard"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Tableau de bord</span>
+                </Link>
+                <Link
+                  href="/user/dashboard/donnees"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Database className="w-4 h-4" />
+                  <span>Données</span>
+                </Link>
+                <Link
+                  href="/user/dashboard/statistiques"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Statistiques</span>
+                </Link>
+                <Link
+                  href="/user/dashboard/structures"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Structures</span>
+                </Link>
+              </>
+            )}
+
+            {/* À propos - Always visible */}
             <Link
               href="/about"
               className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
@@ -47,44 +142,22 @@ export function Header() {
               <FileText className="w-4 h-4" />
               <span>À propos</span>
             </Link>
-            {session && (
-              <>
-                <Link
-                  href={
-                    session.user?.role === "ADMIN"
-                      ? "/admin/dashboard/rapports/statistiques"
-                      : "/user/dashboard/statistiques"
-                  }
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Statistiques</span>
-                </Link>
-                <Link
-                  href="/structures"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Structures</span>
-                </Link>
-              </>
-            )}
+
             <ThemeToggle />
+
+            {/* Login/Logout buttons */}
             {!session ? (
               <Link href="/auth/signin" className="btn-primary">
                 Se connecter
               </Link>
             ) : (
-              <Link
-                href={
-                  session.user?.role === "ADMIN"
-                    ? "/admin/dashboard"
-                    : "/user/dashboard"
-                }
-                className="btn-primary"
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center space-x-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
               >
-                Tableau de Bord
-              </Link>
+                <LogOut className="w-4 h-4" />
+                <span>Se déconnecter</span>
+              </button>
             )}
           </nav>
 
@@ -107,6 +180,99 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 animate-fade-in">
             <nav className="flex flex-col space-y-4">
+              {/* Admin Menu - Mobile */}
+              {session?.user?.role === "ADMIN" && (
+                <>
+                  <Link
+                    href="/admin/dashboard"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Home className="w-4 h-4" />
+                    <span>Tableau de bord</span>
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/donnees/saisie"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Database className="w-4 h-4" />
+                    <span>Données</span>
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/referentiel"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Références</span>
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/structures"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Structures</span>
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/utilisateurs"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Utilisateurs</span>
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/parametres"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Paramètres</span>
+                  </Link>
+                </>
+              )}
+
+              {/* Visitor Menu - Mobile */}
+              {session?.user?.role === "VISITOR" && (
+                <>
+                  <Link
+                    href="/user/dashboard"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Home className="w-4 h-4" />
+                    <span>Tableau de bord</span>
+                  </Link>
+                  <Link
+                    href="/user/dashboard/donnees"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Database className="w-4 h-4" />
+                    <span>Données</span>
+                  </Link>
+                  <Link
+                    href="/user/dashboard/statistiques"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Statistiques</span>
+                  </Link>
+                  <Link
+                    href="/user/dashboard/structures"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Structures</span>
+                  </Link>
+                </>
+              )}
+
+              {/* À propos - Always visible */}
               <Link
                 href="/about"
                 className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
@@ -115,52 +281,28 @@ export function Header() {
                 <FileText className="w-4 h-4" />
                 <span>À propos</span>
               </Link>
-              {session && (
-                <>
-                  <Link
-                    href={
-                      session.user?.role === "ADMIN"
-                        ? "/admin/dashboard/rapports/statistiques"
-                        : "/user/dashboard/statistiques"
-                    }
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    <span>Statistiques</span>
-                  </Link>
-                  <Link
-                    href="/structures"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Structures</span>
-                  </Link>
-                </>
-              )}
+
               <div className="px-4 flex items-center gap-3">
                 <ThemeToggle />
                 {!session ? (
                   <Link
                     href="/auth/signin"
-                    className="btn-primary block text-center"
+                    className="btn-primary block text-center flex-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Se connecter
                   </Link>
                 ) : (
-                  <Link
-                    href={
-                      session.user?.role === "ADMIN"
-                        ? "/admin/dashboard"
-                        : "/user/dashboard"
-                    }
-                    className="btn-primary block text-center"
-                    onClick={() => setIsMenuOpen(false)}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      signOut({ callbackUrl: "/" });
+                    }}
+                    className="flex items-center justify-center space-x-2 text-red-400 dark:text-red-300 hover:text-red-700 dark:hover:text-red-300 transition-colors px-4 py-2 border border-red-600 rounded-lg flex-1"
                   >
-                    Tableau de Bord
-                  </Link>
+                    <LogOut className="w-4 h-4" />
+                    <span>Se déconnecter</span>
+                  </button>
                 )}
               </div>
             </nav>

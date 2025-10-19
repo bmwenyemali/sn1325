@@ -11,7 +11,7 @@ export interface IUser extends Document {
   fonction?: string;
   organisation?: string;
   province?: mongoose.Types.ObjectId;
-  role: "ADMIN" | "USER"; // Only 2 roles: ADMIN and USER
+  role: "ADMIN" | "VISITOR"; // Only 2 roles: ADMIN and VISITOR
   privileges: mongoose.Types.ObjectId[];
   statut: "actif" | "inactif" | "suspendu";
   dernierLogin?: Date;
@@ -114,8 +114,8 @@ const UserSchema = new Schema<IUser>(
     province: { type: Schema.Types.ObjectId, ref: "Province" },
     role: {
       type: String,
-      enum: ["ADMIN", "USER"],
-      default: "USER",
+      enum: ["ADMIN", "VISITOR"],
+      default: "VISITOR",
       required: true,
     },
     privileges: [{ type: Schema.Types.ObjectId, ref: "Privilege" }],

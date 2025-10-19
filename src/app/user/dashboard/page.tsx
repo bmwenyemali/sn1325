@@ -12,64 +12,63 @@ import {
   Building2,
   ArrowRight,
 } from "lucide-react";
+import {
+  useAxes,
+  useIndicateurs,
+  useStructures,
+  useProvinces,
+} from "@/hooks/useApi";
 
 export default function UserDashboardPage() {
   const { data: session } = useSession();
+  const { data: axesData } = useAxes();
+  const { data: indicateursData } = useIndicateurs();
+  const { data: structuresData } = useStructures();
+  const { data: provincesData } = useProvinces();
 
-  // Axes stratégiques (will be dynamic later from API)
-  const axes = [
-    {
-      nom: "Prévention",
-      numero: 1,
-      color: "from-blue-500 to-blue-600",
-      icon: Shield,
-      description: "Prévention des conflits et violences",
-    },
-    {
-      nom: "Participation",
-      numero: 2,
-      color: "from-purple-500 to-purple-600",
-      icon: Users,
-      description: "Participation des femmes aux processus de paix",
-    },
-    {
-      nom: "Protection",
-      numero: 3,
-      color: "from-green-500 to-green-600",
-      icon: Shield,
-      description: "Protection des droits des femmes",
-    },
-    {
-      nom: "Secours et Relèvement",
-      numero: 4,
-      color: "from-orange-500 to-orange-600",
-      icon: TrendingUp,
-      description: "Aide d'urgence et reconstruction",
-    },
-  ];
+  const axes = axesData || [];
+  const indicateurs = indicateursData || [];
+  const structures = structuresData || [];
+  const provinces = provincesData || [];
+
+  // Map axes to display format
+  const axesDisplay = axes.map((axe) => {
+    const colors = [
+      { color: "from-blue-500 to-blue-600", icon: Shield },
+      { color: "from-purple-500 to-purple-600", icon: Users },
+      { color: "from-green-500 to-green-600", icon: Shield },
+      { color: "from-orange-500 to-orange-600", icon: TrendingUp },
+    ];
+    const style = colors[axe.numero - 1] || colors[0];
+    return {
+      ...axe,
+      color: style.color,
+      icon: style.icon,
+    };
+  });
 
   const stats = [
     {
-      name: "Total Indicateurs",
-      value: "245",
+      name: "Axes Stratégiques",
+      value: axes.length.toString(),
       icon: BarChart3,
       color: "bg-blue-500",
     },
     {
-      name: "Données Disponibles",
-      value: "1,832",
+      name: "Total Indicateurs",
+      value: indicateurs.length.toString(),
       icon: Database,
       color: "bg-green-500",
     },
     {
       name: "Structures Enregistrées",
-      value: "156",
+      value: structures.length.toString(),
       icon: Building2,
       color: "bg-purple-500",
     },
     {
       name: "Provinces Couvertes",
-      value: "26",
+      value: provinces.length.toString(),
       icon: Globe,
       color: "bg-orange-500",
     },
@@ -120,12 +119,12 @@ export default function UserDashboardPage() {
           Axes Stratégiques
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {axes.map((axe) => {
+          {axesDisplay.map((axe) => {
             const Icon = axe.icon;
             return (
               <Link
-                key={axe.numero}
-                href={`/user/dashboard/donnees?axe=${axe.numero}`}
+                key={axe._id}
+                href={`/user/dashboard/donnees?axe=${axe._id}`}
                 className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
               >
                 <div
@@ -140,7 +139,9 @@ export default function UserDashboardPage() {
                     </span>
                   </div>
                   <h3 className="text-2xl font-bold mb-2">{axe.nom}</h3>
-                  <p className="text-white/80 mb-4">{axe.description}</p>
+                  <p className="text-white/80 mb-4">
+                    {axe.description || "Données disponibles"}
+                  </p>
                   <div className="flex items-center text-white font-semibold group-hover:translate-x-2 transition-transform">
                     Voir les données
                     <ArrowRight className="w-5 h-5 ml-2" />

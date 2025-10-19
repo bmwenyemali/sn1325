@@ -25,7 +25,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-blue-100 dark:text-blue-100 mb-4 leading-relaxed">
-              Application de monitoring de la Résolution 1325 du Conseil de
+              Base de données de monitoring de la Résolution 1325 du Conseil de
               Sécurité des Nations Unies sur les Femmes, la Paix et la Sécurité
               en République Démocratique du Congo.
             </p>

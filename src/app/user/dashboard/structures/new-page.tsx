@@ -1,55 +1,90 @@
 "use client";
 
 import { useState } from "react";
+import { Search, Filter } from "lucide-react";
+import { useStructures, useAxes, useProvinces } from "@/hooks/useApi";
 import {
-  Building2,
-  MapPin,
-  Mail,
-  Phone,
-  Globe,
-  Search,
-  Filter,
-} from "lucide-react";
-import { useStructures } from "@/hooks/useApi";
+  StructuresTable,
+  StructureDetailModal,
+} from "@/components/StructuresTable";
 
 interface Structure {
   _id: string;
   nom: string;
-  sigle: string;
-  type: string;
-  province?: { nom: string };
-  email: string;
-  telephone: string;
+  sigle?: string;
+  type?: string;
+  photo?: string;
+  telephone?: string;
+  telephonePrive?: string;
+  email?: string;
+  emailPrive?: string;
   siteWeb?: string;
-  description?: string;
+  adresse?: string;
+  aPropos?: string;
+  pointFocal?: string;
+  axes?: Array<{ _id: string; nom: string; numero: number }>;
+  cible?: Array<{ _id: string; nom: string }>;
+  provinces?: Array<{ _id: string; nom: string }>;
+  isNational?: boolean;
+  adresseGeographic?: {
+    latitude?: number;
+    longitude?: number;
+    description?: string;
+  };
 }
 
 export default function UserStructuresPage() {
   const { data: structures, loading } = useStructures();
+  const { data: axes } = useAxes();
+  const { data: provinces } = useProvinces();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [axeFilter, setAxeFilter] = useState("all");
   const [provinceFilter, setProvinceFilter] = useState("all");
+  const [selectedStructure, setSelectedStructure] = useState<Structure | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const structuresArray: Structure[] = structures || [];
+  const axesArray = axes || [];
+  const provincesArray = provinces || [];
 
+  // Filter structures
   const filteredStructures = structuresArray.filter((structure) => {
     const matchesSearch =
       structure.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       structure.sigle?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesType = typeFilter === "all" || structure.type === typeFilter;
+
+    const matchesAxe =
+      axeFilter === "all" ||
+      structure.axes?.some((axe) => axe._id === axeFilter);
+
     const matchesProvince =
-      provinceFilter === "all" || structure.province?.nom === provinceFilter;
-    return matchesSearch && matchesType && matchesProvince;
+      provinceFilter === "all" ||
+      structure.isNational ||
+      structure.provinces?.some((province) => province._id === provinceFilter);
+
+    return matchesSearch && matchesType && matchesAxe && matchesProvince;
   });
 
-  // Get unique provinces and types for filters
-  const uniqueProvinces = Array.from(
-    new Set(structuresArray.map((s) => s.province?.nom).filter(Boolean))
-  ).sort();
-
+  // Get unique types
   const uniqueTypes = Array.from(
     new Set(structuresArray.map((s) => s.type).filter(Boolean))
   ).sort();
+
+  const handleRowClick = (structure: Structure) => {
+    setSelectedStructure(structure);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedStructure(null), 300);
+  };
 
   if (loading) {
     return (
@@ -61,6 +96,7 @@ export default function UserStructuresPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Structures Partenaires
@@ -73,7 +109,8 @@ export default function UserStructuresPage() {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Search className="w-4 h-4 inline mr-2" />
@@ -88,6 +125,7 @@ export default function UserStructuresPage() {
             />
           </div>
 
+          {/* Type Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Filter className="w-4 h-4 inline mr-2" />
@@ -107,9 +145,30 @@ export default function UserStructuresPage() {
             </select>
           </div>
 
+          {/* Axe Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <MapPin className="w-4 h-4 inline mr-2" />
+              <Filter className="w-4 h-4 inline mr-2" />
+              Axe Stratégique
+            </label>
+            <select
+              value={axeFilter}
+              onChange={(e) => setAxeFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            >
+              <option value="all">Tous les axes</option>
+              {axesArray.map((axe) => (
+                <option key={axe._id} value={axe._id}>
+                  Axe {axe.numero}: {axe.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Province Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Filter className="w-4 h-4 inline mr-2" />
               Province
             </label>
             <select
@@ -118,9 +177,9 @@ export default function UserStructuresPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
             >
               <option value="all">Toutes les provinces</option>
-              {uniqueProvinces.map((province) => (
-                <option key={province} value={province}>
-                  {province}
+              {provincesArray.map((province) => (
+                <option key={province._id} value={province._id}>
+                  {province.nom}
                 </option>
               ))}
             </select>
@@ -148,93 +207,28 @@ export default function UserStructuresPage() {
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {uniqueProvinces.length}
+            {uniqueTypes.length}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            Provinces Couvertes
+            Types d&apos;Organisations
           </div>
         </div>
       </div>
 
-      {/* Structures Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStructures.map((structure) => (
-          <div
-            key={structure._id}
-            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-bleu-rdc/10 dark:bg-jaune-rdc/10 p-3 rounded-lg">
-                <Building2 className="w-8 h-8 text-bleu-rdc dark:text-jaune-rdc" />
-              </div>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full">
-                {structure.type}
-              </span>
-            </div>
-
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-              {structure.nom}
-            </h3>
-            {structure.sigle && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold mb-4">
-                {structure.sigle}
-              </p>
-            )}
-
-            {structure.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {structure.description}
-              </p>
-            )}
-
-            <div className="space-y-2 text-sm">
-              {structure.province && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                  {structure.province.nom}
-                </div>
-              )}
-              {structure.email && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">{structure.email}</span>
-                </div>
-              )}
-              {structure.telephone && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
-                  {structure.telephone}
-                </div>
-              )}
-              {structure.siteWeb && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Globe className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <a
-                    href={structure.siteWeb}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate hover:underline"
-                  >
-                    {structure.siteWeb}
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      {/* Table */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+        <StructuresTable
+          structures={filteredStructures}
+          onRowClick={handleRowClick}
+        />
       </div>
 
-      {filteredStructures.length === 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-lg">
-          <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Aucune structure trouvée
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Essayez de modifier vos filtres de recherche
-          </p>
-        </div>
-      )}
+      {/* Detail Modal */}
+      <StructureDetailModal
+        structure={selectedStructure}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

@@ -8,13 +8,10 @@ export async function GET() {
   try {
     await connectDB();
 
-    const grandesCategories = await GrandeCategorie.find()
-      .populate("axe")
-      .sort({ ordre: 1 });
+    const grandesCategories = await GrandeCategorie.find().sort({ ordre: 1 });
 
     const categories = await Categorie.find()
       .populate("grandeCategorie")
-      .populate("axe")
       .sort({ ordre: 1 });
 
     return NextResponse.json({

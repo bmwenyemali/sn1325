@@ -4,10 +4,10 @@ import type { IAxe } from "./Axe";
 export interface IIndicateur extends Document {
   nom: string;
   axe: IAxe["_id"];
-  type: "numerique" | "qualitatif"; // désagrégeable: 1 = numerique, 2 = qualitatif
+  type: "quantitatif" | "qualitatif"; // quantitatif = numeric, qualitatif = text
   description?: string;
 
-  // Flags de désagrégation (pour type numérique)
+  // Flags de désagrégation (pour type quantitatif)
   desagregableParSexe: boolean; // sexeYN
   desagregableParProvince: boolean; // ProvinceYN
   desagregableParAnnee: boolean; // Always true for time series
@@ -15,7 +15,7 @@ export interface IIndicateur extends Document {
   // Cible (optionnel selon indicateur)
   avecCible: boolean; // cibleYN
 
-  // Unité de mesure (pour type numérique)
+  // Unité de mesure (pour type quantitatif)
   unite?: string; // "nombre", "pourcentage", etc.
 
   // Ordre d'affichage
@@ -39,9 +39,9 @@ const IndicateurSchema: Schema = new Schema(
     },
     type: {
       type: String,
-      enum: ["numerique", "qualitatif"],
+      enum: ["quantitatif", "qualitatif"],
       required: [true, "Le type d'indicateur est requis"],
-      default: "numerique",
+      default: "quantitatif",
     },
     description: {
       type: String,

@@ -2,22 +2,27 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IStructure extends Document {
   nom: string;
-  type?: string; // "Ministère", "ONG", "Agence", etc.
+  sigle?: string; // Acronym/Abbreviation
+  type?: string; // "Org Internationale", "Org Publique", "Privée", "Société Civile", "Autres"
   description?: string;
-  adresse?: string;
-  telephone?: string;
-  email?: string;
+  adresse?: string; // Text address manually entered
+  telephone?: string; // Phone Organisation
+  telephonePrive?: string; // Phone Privé
+  email?: string; // Email Organisation
+  emailPrive?: string; // Email Privé
   siteWeb?: string;
-  axes?: mongoose.Types.ObjectId[]; // Reference to Axe model
-  cible?: string[]; // Array of target groups (enfants, femmes, etc.)
+  photo?: string; // Logo URL
+  axes?: mongoose.Types.ObjectId[]; // Reference to Axe model - liste des axes
+  cible?: mongoose.Types.ObjectId[]; // Reference to Cible model - liste des cibles
   aPropos?: string; // About the structure (rich text)
   pointFocal?: string; // Focal point contact person
   adresseGeographic?: {
     latitude?: number;
     longitude?: number;
     description?: string;
-  }; // Geographic coordinates for Google Maps
-  province?: mongoose.Types.ObjectId; // Reference to Province model
+  }; // Geographic coordinates for Google Maps (will setup later)
+  provinces?: mongoose.Types.ObjectId[]; // Multiple provinces or "National" if all
+  isNational?: boolean; // If structure covers all provinces
   actif: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -31,8 +36,19 @@ const StructureSchema: Schema = new Schema(
       unique: true,
       trim: true,
     },
+    sigle: {
+      type: String,
+      trim: true,
+    },
     type: {
       type: String,
+      enum: [
+        "Org Internationale",
+        "Org Publique",
+        "Privée",
+        "Société Civile",
+        "Autres",
+      ],
       trim: true,
     },
     description: {
@@ -47,12 +63,25 @@ const StructureSchema: Schema = new Schema(
       type: String,
       trim: true,
     },
+    telephonePrive: {
+      type: String,
+      trim: true,
+    },
     email: {
       type: String,
       trim: true,
       lowercase: true,
     },
+    emailPrive: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
     siteWeb: {
+      type: String,
+      trim: true,
+    },
+    photo: {
       type: String,
       trim: true,
     },
@@ -64,8 +93,8 @@ const StructureSchema: Schema = new Schema(
     ],
     cible: [
       {
-        type: String,
-        trim: true,
+        type: Schema.Types.ObjectId,
+        ref: "Cible",
       },
     ],
     aPropos: {
@@ -92,9 +121,15 @@ const StructureSchema: Schema = new Schema(
         trim: true,
       },
     },
-    province: {
-      type: Schema.Types.ObjectId,
-      ref: "Province",
+    provinces: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Province",
+      },
+    ],
+    isNational: {
+      type: Boolean,
+      default: false,
     },
     actif: {
       type: Boolean,
@@ -110,9 +145,11 @@ const StructureSchema: Schema = new Schema(
 
 // Indexes
 StructureSchema.index({ nom: 1 });
+StructureSchema.index({ sigle: 1 });
 StructureSchema.index({ type: 1 });
 StructureSchema.index({ axes: 1 });
-StructureSchema.index({ province: 1 });
+StructureSchema.index({ provinces: 1 });
+StructureSchema.index({ isNational: 1 });
 
 export default mongoose.models.Structure ||
   mongoose.model<IStructure>("Structure", StructureSchema);

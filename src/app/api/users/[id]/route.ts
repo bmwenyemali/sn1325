@@ -68,6 +68,11 @@ export async function PATCH(
       delete body.password;
     }
 
+    // Convert empty strings to undefined for ObjectId fields
+    if (body.province === "") {
+      body.province = undefined;
+    }
+
     const user = await User.findByIdAndUpdate(
       id,
       { ...body, dateModification: new Date() },

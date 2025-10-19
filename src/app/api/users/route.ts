@@ -51,6 +51,11 @@ export async function POST(request: NextRequest) {
       body.password = await bcrypt.hash(body.password, 10);
     }
 
+    // Convert empty strings to undefined for ObjectId fields
+    if (body.province === "") {
+      body.province = undefined;
+    }
+
     const user = await User.create(body);
 
     // Remove password from response
