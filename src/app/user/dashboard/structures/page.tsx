@@ -9,19 +9,24 @@ import {
   Globe,
   Search,
   Filter,
+  X,
 } from "lucide-react";
 import { useStructures } from "@/hooks/useApi";
+import { StructuresTable } from "@/components/StructuresTable";
 
 interface Structure {
   _id: string;
   nom: string;
-  sigle: string;
-  type: string;
+  sigle?: string;
+  type?: string;
   province?: { nom: string };
-  email: string;
-  telephone: string;
+  email?: string;
+  telephone?: string;
   siteWeb?: string;
   description?: string;
+  photo?: string;
+  axes?: Array<{ _id: string; nom: string; numero: number }>;
+  provinces?: Array<{ _id: string; nom: string }>;
 }
 
 export default function UserStructuresPage() {
@@ -29,6 +34,9 @@ export default function UserStructuresPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [provinceFilter, setProvinceFilter] = useState("all");
+  const [selectedStructure, setSelectedStructure] = useState<Structure | null>(
+    null
+  );
 
   const structuresArray: Structure[] = structures || [];
 
@@ -157,85 +165,12 @@ export default function UserStructuresPage() {
       </div>
 
       {/* Structures Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStructures.map((structure) => (
-          <div
-            key={structure._id}
-            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-bleu-rdc/10 dark:bg-jaune-rdc/10 p-3 rounded-lg">
-                <Building2 className="w-8 h-8 text-bleu-rdc dark:text-jaune-rdc" />
-              </div>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full">
-                {structure.type}
-              </span>
-            </div>
-
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-              {structure.nom}
-            </h3>
-            {structure.sigle && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold mb-4">
-                {structure.sigle}
-              </p>
-            )}
-
-            {structure.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {structure.description}
-              </p>
-            )}
-
-            <div className="space-y-2 text-sm">
-              {structure.province && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                  {structure.province.nom}
-                </div>
-              )}
-              {structure.email && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <a
-                    href={`mailto:${structure.email}`}
-                    className="truncate hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
-                  >
-                    {structure.email}
-                  </a>
-                </div>
-              )}
-              {structure.telephone && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <a
-                    href={`tel:${structure.telephone}`}
-                    className="hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
-                  >
-                    {structure.telephone}
-                  </a>
-                </div>
-              )}
-              {structure.siteWeb && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Globe className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <a
-                    href={
-                      structure.siteWeb.startsWith("http")
-                        ? structure.siteWeb
-                        : `https://${structure.siteWeb}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
-                  >
-                    {structure.siteWeb}
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+        <StructuresTable
+          structures={filteredStructures}
+          onRowClick={(structure) => setSelectedStructure(structure)}
+          showActions={false}
+        />
       </div>
 
       {filteredStructures.length === 0 && (
@@ -247,6 +182,154 @@ export default function UserStructuresPage() {
           <p className="text-gray-600 dark:text-gray-400">
             Essayez de modifier vos filtres de recherche
           </p>
+        </div>
+      )}
+
+      {/* Modal de détails */}
+      {selectedStructure && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {selectedStructure.nom}
+                  </h2>
+                  {selectedStructure.sigle && (
+                    <p className="text-lg text-gray-600 dark:text-gray-400 font-semibold">
+                      {selectedStructure.sigle}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSelectedStructure(null)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold rounded-full">
+                    {selectedStructure.type}
+                  </span>
+                </div>
+
+                {selectedStructure.description && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                      Description
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {selectedStructure.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t dark:border-slate-700">
+                  {selectedStructure.province && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Province
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {selectedStructure.province.nom}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedStructure.email && (
+                    <div className="flex items-start gap-3">
+                      <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Email
+                        </p>
+                        <a
+                          href={`mailto:${selectedStructure.email}`}
+                          className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
+                        >
+                          {selectedStructure.email}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedStructure.telephone && (
+                    <div className="flex items-start gap-3">
+                      <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Téléphone
+                        </p>
+                        <a
+                          href={`tel:${selectedStructure.telephone}`}
+                          className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
+                        >
+                          {selectedStructure.telephone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedStructure.siteWeb && (
+                    <div className="flex items-start gap-3">
+                      <Globe className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Site Web
+                        </p>
+                        <a
+                          href={
+                            selectedStructure.siteWeb.startsWith("http")
+                              ? selectedStructure.siteWeb
+                              : `https://${selectedStructure.siteWeb}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
+                        >
+                          {selectedStructure.siteWeb}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedStructure.axes &&
+                  selectedStructure.axes.length > 0 && (
+                    <div className="pt-4 border-t dark:border-slate-700">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                        Axes Stratégiques
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedStructure.axes.map((axe) => (
+                          <span
+                            key={axe._id}
+                            className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 text-sm rounded-full"
+                          >
+                            Axe {axe.numero}: {axe.nom}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setSelectedStructure(null)}
+                  className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
