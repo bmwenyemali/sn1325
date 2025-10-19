@@ -1,109 +1,82 @@
-/**
- * Script to create test users in MongoDB
- * Run with: node src/scripts/createTestUsers.mjs
- */
-
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-// MongoDB URI - UPDATE THIS with your MongoDB connection string
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/sn1325"; // Default local MongoDB
+// ⚠️ IMPORTANT: Always use environment variables for database credentials
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// User Schema
-const UserSchema = new mongoose.Schema(
-  {
-    nom: { type: String, required: true },
-    prenom: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    password: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ["ADMIN", "VISITOR"],
-      default: "VISITOR",
-      required: true,
-    },
-    statut: {
-      type: String,
-      enum: ["actif", "inactif", "suspendu"],
-      default: "actif",
-    },
-  },
-  {
-    timestamps: true,
-    collection: "users",
-  }
-);
+if (!MONGODB_URI) {
+  console.error("❌ Error: MONGODB_URI environment variable is not set");
+  console.log("Please set MONGODB_URI in your .env.local file");
+  process.exit(1);
+}
 
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
+const UserSchema = new mongoose.Schema({
+  nom: { type: String, required: true },
+  prenom: String,
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ["ADMIN", "USER"], default: "USER" },
+  province: { type: mongoose.Schema.Types.ObjectId, ref: "Province" },
+  createdAt: { type: Date, default: Date.now },
+});
 
 async function createTestUsers() {
   try {
-    console.log("🔌 Connecting to MongoDB...");
-    console.log("   URI:", MONGODB_URI.replace(/\/\/.*@/, "//***@")); // Hide password
+    console.log("🔍 Connecting to MongoDB...");
     await mongoose.connect(MONGODB_URI);
     console.log("✅ Connected to MongoDB");
 
-    // Delete all existing users
-    console.log("🗑️  Deleting existing users...");
-    const deleted = await User.deleteMany({});
-    console.log(`✅ Deleted ${deleted.deletedCount} existing users`);
+    const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash("12345", 10);
+    // Test users data
+    const testUsers = [
+      {
+        nom: "Admin",
+        prenom: "Super",
+        email: "admin@sn1325.cd",
+        password: "admin123",
+        role: "ADMIN",
+      },
+      {
+        nom: "Utilisateur",
+        prenom: "Test",
+        email: "user@sn1325.cd",
+        password: "user123",
+        role: "USER",
+      },
+    ];
 
-    // Create Admin user
-    console.log("👤 Creating Admin user...");
-    const adminUser = await User.create({
-      nom: "Admin",
-      prenom: "Carine",
-      email: "carine@gmail.com",
-      password: hashedPassword,
-      role: "ADMIN",
-      statut: "actif",
-    });
-    console.log("✅ Admin user created:", {
-      email: adminUser.email,
-      role: adminUser.role,
-    });
+    console.log("\n📝 Creating test users...\n");
 
-    // Create Visitor user
-    console.log("👤 Creating Visitor user...");
-    const visitorUser = await User.create({
-      nom: "User",
-      prenom: "Ben",
-      email: "ben@gmail.com",
-      password: hashedPassword,
-      role: "VISITOR",
-      statut: "actif",
-    });
-    console.log("✅ Visitor user created:", {
-      email: visitorUser.email,
-      role: visitorUser.role,
-    });
+    for (const userData of testUsers) {
+      // Check if user already exists
+      const existingUser = await User.findOne({ email: userData.email });
+      if (existingUser) {
+        console.log(`⚠️  User ${userData.email} already exists, skipping...`);
+        continue;
+      }
 
-    console.log("\n✨ Test users created successfully!");
-    console.log("\n📋 Login credentials:");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("Admin Portal:");
-    console.log("  Email: carine@gmail.com");
-    console.log("  Password: 12345");
-    console.log("  Role: ADMIN");
-    console.log("\nVisitor Portal:");
-    console.log("  Email: ben@gmail.com");
-    console.log("  Password: 12345");
-    console.log("  Role: VISITOR");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+      // Hash password
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // Close connection
-    await mongoose.connection.close();
-    console.log("✅ Database connection closed");
-    process.exit(0);
+      // Create user
+      const user = await User.create({
+        ...userData,
+        password: hashedPassword,
+      });
+
+      console.log(`✅ Created user: ${user.email} (${user.role})`);
+      console.log(`   Temporary password: ${userData.password}`);
+      console.log("");
+    }
+
+    await mongoose.disconnect();
+    console.log("✅ Disconnected from MongoDB");
+    console.log("\n🎉 Test users creation completed!");
   } catch (error) {
-    console.error("❌ Error creating test users:", error);
+    console.error("❌ Error:", error.message);
     process.exit(1);
   }
 }
 
-// Run the script
 createTestUsers();

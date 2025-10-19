@@ -1,8 +1,14 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://didier:Bienvenue2018@sn1325cluster.2d5fksa.mongodb.net/sn1325";
+// ⚠️ IMPORTANT: Always use environment variables for database credentials
+// Never hardcode credentials in your code!
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("❌ Error: MONGODB_URI environment variable is not set");
+  console.log("Please set MONGODB_URI in your .env.local file");
+  process.exit(1);
+}
 
 async function checkUsers() {
   try {
@@ -19,24 +25,20 @@ async function checkUsers() {
 
     // Find all users
     const users = await User.find({});
+    console.log(`\n📊 Found ${users.length} users:\n`);
 
-    console.log("\n📊 All users in database:");
-    console.log("========================\n");
-
-    users.forEach((user) => {
-      console.log(`Email: ${user.email}`);
-      console.log(`Role: ${user.role}`);
-      console.log(`Role Type: ${typeof user.role}`);
-      console.log(`Name: ${user.prenom} ${user.nom}`);
-      console.log("---");
+    users.forEach((user, index) => {
+      console.log(`${index + 1}. ${user.nom} ${user.prenom || ""}`);
+      console.log(`   Email: ${user.email}`);
+      console.log(`   Role: ${user.role || "N/A"}`);
+      console.log(`   ID: ${user._id}`);
+      console.log("");
     });
 
-    console.log(`\n✨ Total users: ${users.length}`);
-
-    await mongoose.connection.close();
-    console.log("\n✅ Connection closed");
+    await mongoose.disconnect();
+    console.log("✅ Disconnected from MongoDB");
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("❌ Error:", error.message);
     process.exit(1);
   }
 }
