@@ -45,7 +45,8 @@ const tabs: TabConfig[] = [
 export default function ParametresPage() {
   const [activeTab, setActiveTab] = useState<TabType>("configuration");
 
-  const ActiveComponent = tabs.find((tab) => tab.id === activeTab)?.component || ConfigurationPage;
+  const ActiveComponent =
+    tabs.find((tab) => tab.id === activeTab)?.component || ConfigurationPage;
 
   return (
     <div className="p-6 space-y-6">

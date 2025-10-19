@@ -1,61 +1,54 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { Settings, Mail, Info, Loader2 } from "lucide-react";
+import { BarChart3, TrendingUp, Loader2 } from "lucide-react";
 
 // Import des pages existantes
-import ConfigurationPage from "./configuration/page";
-import ContactPage from "./contact/page";
-import AboutPage from "./about/page";
+import StatistiquesPage from "./statistiques/page";
+import AnalysesPage from "./analyses/page";
 
-type TabType = "configuration" | "contact" | "about";
+type TabType = "statistiques" | "analyses";
 
 interface TabConfig {
   id: TabType;
   label: string;
-  icon: typeof Settings;
+  icon: typeof BarChart3;
   color: string;
   component: React.ComponentType;
 }
 
 const tabs: TabConfig[] = [
   {
-    id: "configuration",
-    label: "Configuration",
-    icon: Settings,
+    id: "statistiques",
+    label: "Statistiques",
+    icon: BarChart3,
     color: "text-blue-600 dark:text-blue-400",
-    component: ConfigurationPage,
+    component: StatistiquesPage,
   },
   {
-    id: "contact",
-    label: "Contact",
-    icon: Mail,
+    id: "analyses",
+    label: "Analyses",
+    icon: TrendingUp,
     color: "text-green-600 dark:text-green-400",
-    component: ContactPage,
-  },
-  {
-    id: "about",
-    label: "À propos",
-    icon: Info,
-    color: "text-purple-600 dark:text-purple-400",
-    component: AboutPage,
+    component: AnalysesPage,
   },
 ];
 
-export default function ParametresPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("configuration");
+export default function RapportsPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("statistiques");
 
-  const ActiveComponent = tabs.find((tab) => tab.id === activeTab)?.component || ConfigurationPage;
+  const ActiveComponent =
+    tabs.find((tab) => tab.id === activeTab)?.component || StatistiquesPage;
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Paramètres du Système
+          Rapports et Analyses
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Configuration et informations générales du système SN1325
+          Consultez les statistiques et analyses des données SN1325
         </p>
       </div>
 
