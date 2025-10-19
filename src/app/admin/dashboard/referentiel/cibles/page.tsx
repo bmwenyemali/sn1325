@@ -684,6 +684,9 @@ export default function CiblesPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                       Grande Catégorie
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Description
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                       Actions
                     </th>
@@ -693,7 +696,7 @@ export default function CiblesPage() {
                   {filteredCibles.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                       >
                         Aucune cible trouvée
@@ -720,6 +723,9 @@ export default function CiblesPage() {
                           {typeof cible.grandeCategorie === "object"
                             ? cible.grandeCategorie.nom
                             : "N/A"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          {cible.description || "-"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                           <button

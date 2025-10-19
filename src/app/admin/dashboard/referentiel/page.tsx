@@ -4,8 +4,6 @@ import { useState, Suspense } from "react";
 import {
   Target,
   BarChart3,
-  FolderTree,
-  Grid3x3,
   Crosshair,
   MapPin,
   Calendar,
@@ -15,20 +13,11 @@ import {
 // Import dynamique des pages existantes
 import AxesPage from "./axes/page";
 import IndicateursPage from "./indicateurs/page";
-import GrandesCategoriesPage from "./grandes-categories/page";
-import CategoriesPage from "./categories/page";
 import CiblesPage from "./cibles/page";
 import ProvincesPage from "./provinces/page";
 import AnneesPage from "./annees/page";
 
-type TabType =
-  | "axes"
-  | "indicateurs"
-  | "grandes-categories"
-  | "categories"
-  | "cibles"
-  | "provinces"
-  | "annees";
+type TabType = "axes" | "indicateurs" | "cibles" | "provinces" | "annees";
 
 interface TabConfig {
   id: TabType;
@@ -52,20 +41,6 @@ const tabs: TabConfig[] = [
     icon: BarChart3,
     color: "text-green-600 dark:text-green-400",
     component: IndicateursPage,
-  },
-  {
-    id: "grandes-categories",
-    label: "Grandes Catégories",
-    icon: FolderTree,
-    color: "text-purple-600 dark:text-purple-400",
-    component: GrandesCategoriesPage,
-  },
-  {
-    id: "categories",
-    label: "Catégories",
-    icon: Grid3x3,
-    color: "text-yellow-600 dark:text-yellow-400",
-    component: CategoriesPage,
   },
   {
     id: "cibles",
