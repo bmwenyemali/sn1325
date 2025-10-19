@@ -23,6 +23,10 @@ interface Indicateur {
     | "semestrielle"
     | "annuelle";
   statut: "actif" | "inactif";
+  desagregableParSexe: boolean;
+  desagregableParProvince: boolean;
+  desagregableParAnnee: boolean;
+  avecCible: boolean;
   dateCreation: Date;
   dateModification: Date;
 }
@@ -51,6 +55,10 @@ export default function IndicateursPage() {
       | "semestrielle"
       | "annuelle",
     statut: "actif" as "actif" | "inactif",
+    desagregableParSexe: false,
+    desagregableParProvince: false,
+    desagregableParAnnee: true,
+    avecCible: false,
   });
 
   useEffect(() => {
@@ -119,6 +127,10 @@ export default function IndicateursPage() {
       unitesMesure: indicateur.unitesMesure,
       frequenceCollecte: indicateur.frequenceCollecte,
       statut: indicateur.statut,
+      desagregableParSexe: indicateur.desagregableParSexe || false,
+      desagregableParProvince: indicateur.desagregableParProvince || false,
+      desagregableParAnnee: indicateur.desagregableParAnnee !== false,
+      avecCible: indicateur.avecCible || false,
     });
     setShowModal(true);
   };
@@ -154,6 +166,10 @@ export default function IndicateursPage() {
       unitesMesure: [""],
       frequenceCollecte: "trimestrielle",
       statut: "actif",
+      desagregableParSexe: false,
+      desagregableParProvince: false,
+      desagregableParAnnee: true,
+      avecCible: false,
     });
     setEditingIndicateur(null);
     setShowModal(false);
@@ -543,6 +559,82 @@ export default function IndicateursPage() {
                   >
                     + Ajouter une unité
                   </button>
+                </div>
+              </div>
+
+              {/* Options de désagrégation */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Options de désagrégation
+                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.desagregableParSexe}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          desagregableParSexe: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Désagrégable par sexe
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.desagregableParProvince}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          desagregableParProvince: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Désagrégable par province
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.desagregableParAnnee}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          desagregableParAnnee: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Désagrégable par année
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.avecCible}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          avecCible: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Avec cible
+                    </span>
+                  </label>
                 </div>
               </div>
 
