@@ -1,6 +1,15 @@
 "use client";
 
-import { Shield, Users, Globe, Target, BookOpen, Mail } from "lucide-react";
+import {
+  Shield,
+  Users,
+  Globe,
+  Target,
+  BookOpen,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 
 export default function UserAProposPage() {
   return (
@@ -104,26 +113,65 @@ export default function UserAProposPage() {
 
       {/* Contact */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
           <Mail className="w-6 h-6 mr-3 text-bleu-rdc dark:text-jaune-rdc" />
-          Contact
+          Nous Contacter
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Adresse
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Kinshasa, République Démocratique du Congo
-            </p>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <MapPin className="w-4 h-4 mr-2 text-bleu-rdc dark:text-jaune-rdc" />
+                Adresse
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                Secrétariat National 1325
+                <br />
+                Kinshasa, Gombe
+                <br />
+                République Démocratique du Congo
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <Mail className="w-4 h-4 mr-2 text-bleu-rdc dark:text-jaune-rdc" />
+                Email
+              </h3>
+              <a
+                href="mailto:contact@sn1325.cd"
+                className="text-bleu-rdc dark:text-jaune-rdc hover:underline"
+              >
+                contact@sn1325.cd
+              </a>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Email
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              contact@sn1325.cd
-            </p>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <Phone className="w-4 h-4 mr-2 text-bleu-rdc dark:text-jaune-rdc" />
+                Téléphone
+              </h3>
+              <a
+                href="tel:+243123456789"
+                className="text-gray-600 dark:text-gray-400 hover:text-bleu-rdc dark:hover:text-jaune-rdc"
+              >
+                +243 (0) 123 456 789
+              </a>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <Globe className="w-4 h-4 mr-2 text-bleu-rdc dark:text-jaune-rdc" />
+                Site Web
+              </h3>
+              <a
+                href="https://www.sn1325.cd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-bleu-rdc dark:text-jaune-rdc hover:underline"
+              >
+                www.sn1325.cd
+              </a>
+            </div>
           </div>
         </div>
       </div>

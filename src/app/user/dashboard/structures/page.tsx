@@ -197,23 +197,37 @@ export default function UserStructuresPage() {
               {structure.email && (
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
                   <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">{structure.email}</span>
+                  <a
+                    href={`mailto:${structure.email}`}
+                    className="truncate hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
+                  >
+                    {structure.email}
+                  </a>
                 </div>
               )}
               {structure.telephone && (
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
                   <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
-                  {structure.telephone}
+                  <a
+                    href={`tel:${structure.telephone}`}
+                    className="hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
+                  >
+                    {structure.telephone}
+                  </a>
                 </div>
               )}
               {structure.siteWeb && (
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
                   <Globe className="w-4 h-4 mr-2 flex-shrink-0" />
                   <a
-                    href={structure.siteWeb}
+                    href={
+                      structure.siteWeb.startsWith("http")
+                        ? structure.siteWeb
+                        : `https://${structure.siteWeb}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="truncate hover:underline"
+                    className="truncate hover:text-bleu-rdc dark:hover:text-jaune-rdc hover:underline"
                   >
                     {structure.siteWeb}
                   </a>
