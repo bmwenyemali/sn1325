@@ -93,6 +93,7 @@ export function useIndicateurs(options: UseApiOptions = {}) {
     Array<{
       _id: string;
       nom: string;
+      code: string;
       type: string;
       axe: {
         _id: string;
@@ -155,4 +156,80 @@ export function useAnnees(options: UseApiOptions = {}) {
       annee: number;
     }>
   >("/api/annees", options);
+}
+
+/**
+ * Hook for fetching numeric data
+ */
+export function useDataNumeric(
+  filters?: {
+    indicateur?: string;
+    annee?: number;
+    province?: string;
+    sexe?: string;
+  },
+  options: UseApiOptions = {}
+) {
+  const params = new URLSearchParams();
+  if (filters?.indicateur) params.set("indicateur", filters.indicateur);
+  if (filters?.annee) params.set("annee", filters.annee.toString());
+  if (filters?.province) params.set("province", filters.province);
+  if (filters?.sexe) params.set("sexe", filters.sexe);
+
+  const url = `/api/data-numeric${
+    params.toString() ? `?${params.toString()}` : ""
+  }`;
+
+  return useApi<
+    Array<{
+      _id: string;
+      indicateur: {
+        _id: string;
+        nom: string;
+        code: string;
+      };
+      annee: number;
+      sexe?: string;
+      province?: {
+        _id: string;
+        nom: string;
+      };
+      cible?: {
+        _id: string;
+        nom: string;
+      };
+      valeur: number;
+      pourcentage?: number;
+      source?: string;
+      notes?: string;
+    }>
+  >(url, options);
+}
+
+/**
+ * Hook for fetching qualitative data (LMMA)
+ */
+export function useDataQualitative(options: UseApiOptions = {}) {
+  return useApi<
+    Array<{
+      _id: string;
+      indicateur: {
+        _id: string;
+        nom: string;
+        code: string;
+      };
+      items: Array<{
+        loisMesuresActions: {
+          _id: string;
+          titre: string;
+          type: string;
+        };
+        annee: number;
+        ordre?: number;
+        notes?: string;
+      }>;
+      description?: string;
+      source?: string;
+    }>
+  >("/api/data-qualitative", options);
 }
