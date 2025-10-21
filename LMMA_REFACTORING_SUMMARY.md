@@ -9,9 +9,11 @@
 ## Problèmes Identifiés par l'Utilisateur
 
 ### 1. ❌ Architecture LMMA Incorrecte
+
 **Rapport utilisateur**: "Je crois que tu ne m'as pas compris pour les donnees qualitatifs, dans le formulaire tu as bien fait de mettre seulement les indicateurs qualitatifs. mais pour l'ajout des LMMAs, ce n'est ici qu'on ajoutes les nouvelles LMMAs, plus on selectionne les LMMA a partir de la collection loismesuresactions."
 
 **Problème**:
+
 - L'implémentation actuelle **créait** de nouvelles LMMA directement dans les items
 - Les LMMA avaient des champs `lmaTitre` et `lmaType` stockés directement dans DataQualitative
 - **Architecture incorrecte** : Les LMMA doivent être **sélectionnées** depuis une collection existante
@@ -19,9 +21,11 @@
 **Impact**: Duplication des données, pas de réutilisation, mauvaise normalisation de la base de données
 
 ### 2. ❌ Erreur de Modification des Indicateurs
+
 **Rapport utilisateur**: "pour la gestion des indicateurs, modification ne fonctionne pas. que peut etre le probleme? j'ai mal importer les donnees? je recois cette erreur : TypeError: Cannot read properties of undefined (reading 'map')"
 
 **Problème**:
+
 - Lors de l'édition d'un indicateur, si `unitesMesure` est `undefined` dans la BD
 - Le code tentait d'appeler `.map()` sur `undefined`
 - Causait un crash de l'application
@@ -33,11 +37,14 @@
 ### ✅ 1. Nouvelle Architecture LMMA (Refonte Complète)
 
 #### A. Création des API Endpoints LMMA
+
 **Fichiers créés**:
+
 - `src/app/api/lois-mesures-actions/route.ts` (GET, POST)
 - `src/app/api/lois-mesures-actions/[id]/route.ts` (GET, PATCH, DELETE)
 
 **Fonctionnalités**:
+
 ```typescript
 // GET /api/lois-mesures-actions
 // - Récupère toutes les LMMA
@@ -63,9 +70,13 @@
 ```
 
 **Note importante**: Utilisation de Next.js 15 async params pattern:
+
 ```typescript
 // Avant (causait erreur de compilation)
-export async function GET(request: NextRequest, { params }: { params: { id: string } })
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+);
 
 // Après (Next.js 15)
 export async function GET(
@@ -78,27 +89,32 @@ export async function GET(
 ```
 
 #### B. Hook Custom pour LMMA
+
 **Fichier créé**: `src/hooks/useLoisMesuresActions.ts`
 
 ```typescript
 export function useLoisMesuresActions() {
-  const [loisMesuresActions, setLoisMesuresActions] = useState<LMA[] | null>(null);
+  const [loisMesuresActions, setLoisMesuresActions] = useState<LMA[] | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   // Fetch automatique au montage
   // Fonction mutate() pour rafraîchir les données
-  
+
   return { loisMesuresActions, isLoading, isError, mutate };
 }
 ```
 
 #### C. Refonte Complète de DataQualitativeTab
+
 **Fichier modifié**: `src/components/data/DataQualitativeTab.tsx`
 
 **Changements majeurs**:
 
 1. **Import du hook LMMA**:
+
 ```typescript
 import { useLoisMesuresActions } from "@/hooks/useLoisMesuresActions";
 
@@ -107,6 +123,7 @@ const [selectedLMMAs, setSelectedLMMAs] = useState<string[]>([]);
 ```
 
 2. **Nouveau handleItemSubmit - Sélection Multiple**:
+
 ```typescript
 const handleItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -154,11 +171,13 @@ const handleItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 3. **Nouveau Modal LMMA - Multi-Selection**:
 
 **Avant** (modal de création):
+
 - Champs: titre, type, année, ordre, notes
 - Créait une nouvelle LMMA à chaque ajout
 - Duplication des données
 
 **Après** (modal de sélection):
+
 - Liste scrollable de toutes les LMMA disponibles
 - Checkboxes pour sélection multiple
 - Affichage enrichi : nom, type (badge), année, statut, référence
@@ -167,6 +186,7 @@ const handleItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 - Bouton désactivé si aucune sélection
 
 **Interface du modal**:
+
 ```tsx
 {/* Liste des LMMA disponibles */}
 <div className="border rounded-lg max-h-96 overflow-y-auto">
@@ -212,6 +232,7 @@ const handleItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 ```
 
 **Fonctionnalités UX**:
+
 - Message d'instructions en haut
 - Hover effect sur chaque LMMA
 - Badges colorés par type et statut
@@ -237,10 +258,11 @@ const handleEdit = (indicateur: Indicateur) => {
     code: indicateur.code,
     description: indicateur.description,
     type: indicateur.type,
-    axe: typeof indicateur.axe === "object" ? indicateur.axe._id : indicateur.axe,
-    unitesMesure: indicateur.unitesMesure || [""],  // ✅ Fallback à [""]
-    frequenceCollecte: indicateur.frequenceCollecte || "trimestrielle",  // ✅ Fallback
-    statut: indicateur.statut || "actif",  // ✅ Fallback
+    axe:
+      typeof indicateur.axe === "object" ? indicateur.axe._id : indicateur.axe,
+    unitesMesure: indicateur.unitesMesure || [""], // ✅ Fallback à [""]
+    frequenceCollecte: indicateur.frequenceCollecte || "trimestrielle", // ✅ Fallback
+    statut: indicateur.statut || "actif", // ✅ Fallback
     desagregableParSexe: indicateur.desagregableParSexe || false,
     desagregableParProvince: indicateur.desagregableParProvince || false,
     desagregableParAnnee: indicateur.desagregableParAnnee !== false,
@@ -257,6 +279,7 @@ const handleEdit = (indicateur: Indicateur) => {
 ## Modèle de Données (Rappel)
 
 ### LoisMesuresActions (Collection Principale)
+
 ```typescript
 {
   nom: string;          // "Loi n°15/013 du 1er août 2015"
@@ -270,6 +293,7 @@ const handleEdit = (indicateur: Indicateur) => {
 ```
 
 ### DataQualitative.items (Items avec Références)
+
 ```typescript
 {
   loisMesuresActions: ObjectId;  // ✅ Référence vers LoisMesuresActions
@@ -280,6 +304,7 @@ const handleEdit = (indicateur: Indicateur) => {
 ```
 
 **Exemple d'utilisation**:
+
 ```
 Indicateur: "Nombre de femmes dans les forces armées"
 Items LMMA:
@@ -292,12 +317,15 @@ Items LMMA:
 ## Workflow Administrateur (Nouveau)
 
 ### Étape 1: Créer des LMMA dans Référentiel
-*Note: Cette fonctionnalité sera ajoutée dans la prochaine phase*
+
+_Note: Cette fonctionnalité sera ajoutée dans la prochaine phase_
+
 - Aller dans Référentiel > Lois/Mesures/Actions
 - Créer les LMMA une seule fois
 - Exemples: "Loi sur la parité", "Décret d'application", "Action de sensibilisation"
 
 ### Étape 2: Créer un Indicateur Qualitatif
+
 - Aller dans Données > Données Qualitatives
 - Cliquer "Ajouter Indicateur"
 - Sélectionner un indicateur qualitatif dans le dropdown (filtré automatiquement)
@@ -305,6 +333,7 @@ Items LMMA:
 - Enregistrer
 
 ### Étape 3: Associer des LMMA à l'Indicateur
+
 - Cliquer sur le bouton vert "Ajouter LMMA"
 - Modal s'ouvre avec la liste de **toutes les LMMA disponibles**
 - **Cocher** une ou plusieurs LMMA (multi-sélection)
@@ -313,6 +342,7 @@ Items LMMA:
 - Cliquer "Ajouter (X)" où X = nombre sélectionné
 
 ### Étape 4: Résultat
+
 - Chaque LMMA sélectionnée devient un item séparé
 - Les items sont numérotés automatiquement (ordre, ordre+1, ordre+2...)
 - Toutes les LMMA partagent la même année et notes
@@ -323,23 +353,28 @@ Items LMMA:
 ## Avantages de la Nouvelle Architecture
 
 ### 1. Normalisation des Données ✅
+
 - Une LMMA créée une seule fois
 - Réutilisable pour plusieurs indicateurs
 - Pas de duplication
 
 ### 2. Maintenance Facilitée ✅
+
 - Modification d'une LMMA se répercute partout
 - Exemple: Correction du nom de la loi, tous les indicateurs sont mis à jour
 
 ### 3. Reporting Amélioré ✅
+
 - Possibilité de voir tous les indicateurs liés à une LMMA spécifique
 - Analyse croisée: "Quels indicateurs sont impactés par cette loi?"
 
 ### 4. Performance ✅
+
 - Moins de données stockées
 - Requêtes optimisées avec populate()
 
 ### 5. UX Améliorée ✅
+
 - Admin ne retape pas les mêmes LMMA
 - Sélection multiple rapide
 - Affichage visuel avec badges
@@ -349,9 +384,11 @@ Items LMMA:
 ## À Faire (Prochaines Étapes)
 
 ### 1. Page de Gestion des LMMA (PRIORITÉ HAUTE)
+
 **Localisation**: `/admin/dashboard/referentiel/lois-mesures-actions`
 
 **Fonctionnalités nécessaires**:
+
 - Afficher toutes les LMMA avec filtres (type, statut, année)
 - Créer nouvelle LMMA (formulaire complet)
 - Modifier LMMA existante
@@ -361,8 +398,9 @@ Items LMMA:
 - Statistiques: nombre total, par type, par statut
 
 **Champs du formulaire**:
-- Nom * (texte)
-- Type * (dropdown depuis TypeLMA)
+
+- Nom \* (texte)
+- Type \* (dropdown depuis TypeLMA)
 - Description (textarea)
 - Année (number)
 - Référence (texte) - ex: "JO n°..."
@@ -370,17 +408,20 @@ Items LMMA:
 - Statut (dropdown: en vigueur, abrogé, en projet, autre)
 
 ### 2. Affichage Visitor Portal
+
 **Fichier à modifier**: Composant d'affichage des données qualitatives pour visiteurs
 
 **Actuellement**: Affiche probablement les champs incorrects (lmaTitre, lmaType)
 
 **À corriger**:
+
 - Populate `loisMesuresActions` avec ses détails
 - Afficher `loisMesuresActions.nom` au lieu de `lmaTitre`
 - Afficher `loisMesuresActions.type.nom` au lieu de `lmaType`
 - Afficher référence, lien, statut si disponibles
 
 ### 3. Migration des Données Existantes
+
 **Script de migration nécessaire** pour convertir les anciennes données:
 
 ```javascript
@@ -390,7 +431,7 @@ for (dataQualitative of existingData) {
     if (item.lmaTitre && item.lmaType) {
       // 1. Chercher ou créer LMMA correspondante
       let lmma = await LoisMesuresActions.findOne({ nom: item.lmaTitre });
-      
+
       if (!lmma) {
         // 2. Créer nouvelle LMMA
         const typeLMA = await TypeLMA.findOne({ nom: item.lmaType });
@@ -400,7 +441,7 @@ for (dataQualitative of existingData) {
           // Autres champs...
         });
       }
-      
+
       // 3. Mettre à jour l'item avec la référence
       item.loisMesuresActions = lmma._id;
       delete item.lmaTitre;
@@ -412,6 +453,7 @@ for (dataQualitative of existingData) {
 ```
 
 ### 4. Validation et Tests
+
 - [ ] Tester création indicateur qualitatif
 - [ ] Tester sélection d'une seule LMMA
 - [ ] Tester sélection de plusieurs LMMA (3-5 items)
@@ -426,6 +468,7 @@ for (dataQualitative of existingData) {
 ## Build & Deployment
 
 ### Build Status
+
 ```
 ✓ Compiled successfully in 10.8s
 ✓ Linting and checking validity of types
@@ -440,11 +483,13 @@ New API Routes:
 ```
 
 ### Warnings (Non-bloquants)
+
 - React hooks exhaustive-deps dans statistiques page
 - Variable `getMobileLinkClasses` non utilisée dans Header
 - Mongoose duplicate index warnings (comportement normal)
 
 ### Fichiers Modifiés
+
 1. `src/app/api/lois-mesures-actions/route.ts` (NEW)
 2. `src/app/api/lois-mesures-actions/[id]/route.ts` (NEW)
 3. `src/hooks/useLoisMesuresActions.ts` (NEW)
@@ -462,7 +507,7 @@ PROBLÈMES RÉSOLUS:
 1. ❌ Architecture LMMA incorrecte
    - Les LMMA étaient créées directement dans les items
    - Causait duplication et mauvaise normalisation
-   
+
 2. ❌ Erreur modification indicateurs
    - unitesMesure undefined causait crash
    - TypeError: Cannot read properties of undefined
@@ -513,6 +558,7 @@ Build: ✅ 58 pages, 10.8s, no errors
 ## Prochaine Session
 
 ### Priorités
+
 1. **HAUTE**: Créer page de gestion LMMA dans Référentiel
 2. **HAUTE**: Corriger affichage visitor portal (populate LMMA)
 3. **MOYENNE**: Script de migration des données
@@ -520,6 +566,7 @@ Build: ✅ 58 pages, 10.8s, no errors
 5. **BASSE**: Page statistiques avancées (selon user request)
 
 ### Questions pour l'utilisateur
+
 1. Avez-vous déjà des LMMA dans votre base de données?
 2. Si oui, sont-elles dans une collection séparée ou dans les items?
 3. Voulez-vous une migration automatique ou manuelle?
@@ -532,6 +579,7 @@ Build: ✅ 58 pages, 10.8s, no errors
 Cette refonte corrige un problème d'architecture fondamental qui aurait causé des problèmes majeurs à long terme. La nouvelle implémentation suit les meilleures pratiques de normalisation des bases de données et offre une bien meilleure expérience utilisateur pour les administrateurs.
 
 **Impact positif**:
+
 - ✅ Pas de duplication des données
 - ✅ Maintenance facilitée
 - ✅ Performance améliorée

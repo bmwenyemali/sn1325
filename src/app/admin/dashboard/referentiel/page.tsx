@@ -8,6 +8,7 @@ import {
   MapPin,
   Calendar,
   Loader2,
+  Scale,
 } from "lucide-react";
 
 // Import dynamique des pages existantes
@@ -16,8 +17,15 @@ import IndicateursPage from "./indicateurs/page";
 import CiblesPage from "./cibles/page";
 import ProvincesPage from "./provinces/page";
 import AnneesPage from "./annees/page";
+import LoisMesuresActionsPage from "./lois-mesures-actions/page";
 
-type TabType = "axes" | "indicateurs" | "cibles" | "provinces" | "annees";
+type TabType =
+  | "axes"
+  | "indicateurs"
+  | "cibles"
+  | "provinces"
+  | "annees"
+  | "lmma";
 
 interface TabConfig {
   id: TabType;
@@ -62,6 +70,13 @@ const tabs: TabConfig[] = [
     icon: Calendar,
     color: "text-orange-600 dark:text-orange-400",
     component: AnneesPage,
+  },
+  {
+    id: "lmma",
+    label: "Lois, Mesures & Actions",
+    icon: Scale,
+    color: "text-purple-600 dark:text-purple-400",
+    component: LoisMesuresActionsPage,
   },
 ];
 

@@ -23,18 +23,16 @@ export async function POST(
     const { id } = await params;
     const body = await request.json();
 
-    // Find or create the LMA reference
-    let lma = await LoisMesuresActions.findOne({
-      titre: body.lmaTitre,
-      type: body.lmaType,
-    });
+    // Validate that the LMMA exists
+    const lmaExists = await LoisMesuresActions.findById(
+      body.loisMesuresActions
+    );
 
-    if (!lma) {
-      lma = await LoisMesuresActions.create({
-        titre: body.lmaTitre,
-        type: body.lmaType,
-        ordre: body.ordre || 0,
-      });
+    if (!lmaExists) {
+      return NextResponse.json(
+        { success: false, error: "Loi/Mesure/Action non trouvée" },
+        { status: 404 }
+      );
     }
 
     // Add item to DataQualitative
@@ -48,8 +46,9 @@ export async function POST(
     }
 
     dataQualitative.items.push({
-      loisMesuresActions: lma._id,
+      loisMesuresActions: body.loisMesuresActions,
       annee: body.annee,
+      ordre: body.ordre || 0,
       notes: body.notes || "",
     });
 

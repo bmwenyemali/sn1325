@@ -3,6 +3,9 @@ import { auth } from "../../../../auth";
 import connectDB from "@/lib/db";
 import DataNumeric from "@/models/DataNumeric";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 30; // Cache for 30 seconds
+
 // GET /api/data-numeric - Get all numeric data
 export async function GET(request: NextRequest) {
   try {

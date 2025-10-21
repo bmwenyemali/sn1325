@@ -26,15 +26,32 @@ export default function UserDataQualitativeTab() {
     filteredData.forEach((item) => {
       item.items?.forEach(
         (lmma: {
-          loisMesuresActions: { titre: string; type: string };
+          loisMesuresActions:
+            | {
+                _id: string;
+                nom?: string;
+                titre?: string;
+                type: { nom: string } | string;
+              }
+            | string;
           annee: number;
           notes?: string;
         }) => {
+          const lmmaObj =
+            typeof lmma.loisMesuresActions === "object"
+              ? lmma.loisMesuresActions
+              : null;
+          const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+          const typeName =
+            typeof lmmaObj?.type === "object"
+              ? lmmaObj.type.nom
+              : lmmaObj?.type || "N/A";
+
           rows.push([
             item.indicateur.nom,
             item.indicateur.code,
-            lmma.loisMesuresActions.titre,
-            lmma.loisMesuresActions.type,
+            lmmaNom,
+            typeName,
             lmma.annee.toString(),
             lmma.notes || "N/A",
           ]);
@@ -171,22 +188,41 @@ export default function UserDataQualitativeTab() {
                   {item.items.slice(0, 3).map(
                     (
                       lmma: {
-                        loisMesuresActions: { titre: string; type: string };
+                        loisMesuresActions:
+                          | {
+                              _id: string;
+                              nom?: string;
+                              titre?: string;
+                              type: { nom: string } | string;
+                            }
+                          | string;
                         annee: number;
                         ordre?: number;
                       },
                       idx: number
-                    ) => (
-                      <li key={idx} className="pl-2">
-                        <span className="font-medium">
-                          {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                          {lmma.loisMesuresActions.titre}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                          ({lmma.loisMesuresActions.type}, {lmma.annee})
-                        </span>
-                      </li>
-                    )
+                    ) => {
+                      const lmmaObj =
+                        typeof lmma.loisMesuresActions === "object"
+                          ? lmma.loisMesuresActions
+                          : null;
+                      const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+                      const typeName =
+                        typeof lmmaObj?.type === "object"
+                          ? lmmaObj.type.nom
+                          : lmmaObj?.type || "N/A";
+
+                      return (
+                        <li key={idx} className="pl-2">
+                          <span className="font-medium">
+                            {lmma.ordre ? `${lmma.ordre}. ` : ""}
+                            {lmmaNom}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                            ({typeName}, {lmma.annee})
+                          </span>
+                        </li>
+                      );
+                    }
                   )}
                 </ul>
               </div>
@@ -266,38 +302,67 @@ export default function UserDataQualitativeTab() {
                   {selectedData.items?.map(
                     (
                       lmma: {
-                        loisMesuresActions: { titre: string; type: string };
+                        loisMesuresActions:
+                          | {
+                              _id: string;
+                              nom?: string;
+                              titre?: string;
+                              type: { nom: string } | string;
+                              description?: string;
+                              reference?: string;
+                            }
+                          | string;
                         annee: number;
                         ordre?: number;
                         notes?: string;
                       },
                       idx: number
-                    ) => (
-                      <div
-                        key={idx}
-                        className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900 dark:text-white">
-                              {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                              {lmma.loisMesuresActions.titre}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              <span className="font-medium">
-                                {lmma.loisMesuresActions.type}
-                              </span>{" "}
-                              - {lmma.annee}
-                            </p>
-                            {lmma.notes && (
-                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                {lmma.notes}
+                    ) => {
+                      const lmmaObj =
+                        typeof lmma.loisMesuresActions === "object"
+                          ? lmma.loisMesuresActions
+                          : null;
+                      const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+                      const typeName =
+                        typeof lmmaObj?.type === "object"
+                          ? lmmaObj.type.nom
+                          : lmmaObj?.type || "N/A";
+
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {lmma.ordre ? `${lmma.ordre}. ` : ""}
+                                {lmmaNom}
                               </p>
-                            )}
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <span className="font-medium">{typeName}</span>{" "}
+                                - {lmma.annee}
+                              </p>
+                              {lmmaObj?.description && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                  {lmmaObj.description}
+                                </p>
+                              )}
+                              {lmmaObj?.reference && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  Réf: {lmmaObj.reference}
+                                </p>
+                              )}
+                              {lmma.notes && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+                                  Note: {lmma.notes}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )
+                      );
+                    }
                   )}
                   {(!selectedData.items || selectedData.items.length === 0) && (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-4">

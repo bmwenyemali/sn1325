@@ -3,6 +3,9 @@ import { auth } from "../../../../auth";
 import connectDB from "@/lib/db";
 import { SimpleData } from "@/models/SimpleData";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 30; // Cache for 30 seconds
+
 // GET /api/data-province - Get all province data
 export async function GET(request: NextRequest) {
   try {

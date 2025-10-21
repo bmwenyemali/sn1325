@@ -3,6 +3,9 @@ import { auth } from "../../../../auth";
 import connectDB from "@/lib/db";
 import DataQualitative from "@/models/DataQualitative";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 30; // Cache for 30 seconds
+
 // GET /api/data-liste - Get all qualitative data
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +28,12 @@ export async function GET(request: NextRequest) {
 
     const dataQualitative = await DataQualitative.find(query)
       .populate("indicateur")
-      .populate("items.loisMesuresActions")
+      .populate({
+        path: "items.loisMesuresActions",
+        populate: {
+          path: "type",
+        },
+      })
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, data: dataQualitative });
@@ -60,7 +68,12 @@ export async function POST(request: NextRequest) {
 
     const populatedData = await DataQualitative.findById(dataQualitative._id)
       .populate("indicateur")
-      .populate("items.loisMesuresActions");
+      .populate({
+        path: "items.loisMesuresActions",
+        populate: {
+          path: "type",
+        },
+      });
 
     return NextResponse.json(
       { success: true, data: populatedData },
