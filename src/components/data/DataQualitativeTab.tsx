@@ -69,7 +69,9 @@ export default function DataQualitativeTab() {
       lmaTitre: formData.get("lmaTitre"),
       lmaType: formData.get("lmaType"),
       annee: parseInt(formData.get("annee") as string),
-      ordre: formData.get("ordre") ? parseInt(formData.get("ordre") as string) : undefined,
+      ordre: formData.get("ordre")
+        ? parseInt(formData.get("ordre") as string)
+        : undefined,
       notes: formData.get("notes") || "",
     };
 
@@ -77,7 +79,7 @@ export default function DataQualitativeTab() {
       const url = `/api/data-liste/${currentIndicatorId}/items${
         editingItem ? `/${editingItem._id}` : ""
       }`;
-      const method = editingItem ? "PUT" : "POST";
+      const method = editingItem ? "PATCH" : "POST";
 
       const res = await fetch(url, {
         method,
@@ -98,7 +100,11 @@ export default function DataQualitativeTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet indicateur et tous ses items ?"))
+    if (
+      !confirm(
+        "Êtes-vous sûr de vouloir supprimer cet indicateur et tous ses items ?"
+      )
+    )
       return;
 
     try {
@@ -119,9 +125,12 @@ export default function DataQualitativeTab() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet item ?")) return;
 
     try {
-      const res = await fetch(`/api/data-liste/${indicatorId}/items/${itemId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/data-liste/${indicatorId}/items/${itemId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (res.ok) {
         window.location.reload();
@@ -307,7 +316,12 @@ export default function DataQualitativeTab() {
                           <Edit2 className="w-3 h-3" />
                         </button>
                         <button
-                          onClick={() => handleDeleteItem(item._id, (lmma as { _id?: string })._id || "")}
+                          onClick={() =>
+                            handleDeleteItem(
+                              item._id,
+                              (lmma as { _id?: string })._id || ""
+                            )
+                          }
                           className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                           title="Supprimer"
                         >
@@ -611,35 +625,42 @@ export default function DataQualitativeTab() {
                   LOIS, MESURES & ACTIONS ({selectedData.items?.length || 0})
                 </h3>
                 <div className="space-y-3">
-                  {selectedData.items?.map((lmma: {
-                    loisMesuresActions: { titre: string; type: string };
-                    annee: number;
-                    ordre?: number;
-                    notes?: string;
-                  }, idx: number) => (
-                    <div
-                      key={idx}
-                      className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                            {lmma.loisMesuresActions.titre}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            <span className="font-medium">{lmma.loisMesuresActions.type}</span>{" "}
-                            - {lmma.annee}
-                          </p>
-                          {lmma.notes && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                              {lmma.notes}
+                  {selectedData.items?.map(
+                    (
+                      lmma: {
+                        loisMesuresActions: { titre: string; type: string };
+                        annee: number;
+                        ordre?: number;
+                        notes?: string;
+                      },
+                      idx: number
+                    ) => (
+                      <div
+                        key={idx}
+                        className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {lmma.ordre ? `${lmma.ordre}. ` : ""}
+                              {lmma.loisMesuresActions.titre}
                             </p>
-                          )}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <span className="font-medium">
+                                {lmma.loisMesuresActions.type}
+                              </span>{" "}
+                              - {lmma.annee}
+                            </p>
+                            {lmma.notes && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                {lmma.notes}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                   {(!selectedData.items || selectedData.items.length === 0) && (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                       Aucun item LMMA

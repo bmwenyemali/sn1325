@@ -81,7 +81,7 @@ export default function DataNumericProvincialTab() {
       const url = editingData
         ? `/api/data-numeric/${editingData._id}`
         : "/api/data-numeric";
-      const method = editingData ? "PUT" : "POST";
+      const method = editingData ? "PATCH" : "POST";
 
       const res = await fetch(url, {
         method,

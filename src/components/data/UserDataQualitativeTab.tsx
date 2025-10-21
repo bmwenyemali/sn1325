@@ -167,7 +167,7 @@ export default function UserDataQualitativeTab() {
                 <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Lois, Mesures & Actions
                 </h4>
-                <div className="space-y-2">
+                <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
                   {item.items.slice(0, 3).map(
                     (
                       lmma: {
@@ -177,21 +177,18 @@ export default function UserDataQualitativeTab() {
                       },
                       idx: number
                     ) => (
-                      <div
-                        key={idx}
-                        className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
-                      >
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <li key={idx} className="pl-2">
+                        <span className="font-medium">
                           {lmma.ordre ? `${lmma.ordre}. ` : ""}
                           {lmma.loisMesuresActions.titre}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {lmma.loisMesuresActions.type} - {lmma.annee}
-                        </p>
-                      </div>
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                          ({lmma.loisMesuresActions.type}, {lmma.annee})
+                        </span>
+                      </li>
                     )
                   )}
-                </div>
+                </ul>
               </div>
             )}
 
