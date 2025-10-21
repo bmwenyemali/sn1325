@@ -205,7 +205,7 @@ export function Header() {
                 <>
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses("/admin/dashboard")}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Home className="w-4 h-4" />
@@ -213,7 +213,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/admin/dashboard/donnees"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses("/admin/dashboard/donnees")}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Database className="w-4 h-4" />
@@ -221,7 +221,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/admin/dashboard/referentiel"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/admin/dashboard/referentiel"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <BookOpen className="w-4 h-4" />
@@ -229,7 +231,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/admin/dashboard/structures"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/admin/dashboard/structures"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Building2 className="w-4 h-4" />
@@ -237,7 +241,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/admin/dashboard/utilisateurs"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/admin/dashboard/utilisateurs"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Users className="w-4 h-4" />
@@ -245,7 +251,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/admin/dashboard/parametres"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/admin/dashboard/parametres"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Settings className="w-4 h-4" />
@@ -259,7 +267,7 @@ export function Header() {
                 <>
                   <Link
                     href="/user/dashboard"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses("/user/dashboard")}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Home className="w-4 h-4" />
@@ -267,7 +275,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/user/dashboard/donnees"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses("/user/dashboard/donnees")}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Database className="w-4 h-4" />
@@ -275,7 +283,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/user/dashboard/statistiques"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/user/dashboard/statistiques"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <BarChart3 className="w-4 h-4" />
@@ -283,7 +293,9 @@ export function Header() {
                   </Link>
                   <Link
                     href="/user/dashboard/structures"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                    className={getMobileLinkClasses(
+                      "/user/dashboard/structures"
+                    )}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Building2 className="w-4 h-4" />
@@ -295,7 +307,7 @@ export function Header() {
               {/* À propos - Always visible */}
               <Link
                 href="/about"
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
+                className={getMobileLinkClasses("/about")}
                 onClick={() => setIsMenuOpen(false)}
               >
                 <FileText className="w-4 h-4" />
