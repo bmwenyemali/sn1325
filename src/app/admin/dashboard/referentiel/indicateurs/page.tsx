@@ -124,9 +124,9 @@ export default function IndicateursPage() {
         typeof indicateur.axe === "object"
           ? indicateur.axe._id
           : indicateur.axe,
-      unitesMesure: indicateur.unitesMesure,
-      frequenceCollecte: indicateur.frequenceCollecte,
-      statut: indicateur.statut,
+      unitesMesure: indicateur.unitesMesure || [""],
+      frequenceCollecte: indicateur.frequenceCollecte || "trimestrielle",
+      statut: indicateur.statut || "actif",
       desagregableParSexe: indicateur.desagregableParSexe || false,
       desagregableParProvince: indicateur.desagregableParProvince || false,
       desagregableParAnnee: indicateur.desagregableParAnnee !== false,

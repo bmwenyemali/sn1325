@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Edit2, Trash2, Search, X, ListChecks, Eye } from "lucide-react";
 import { useDataQualitative, useIndicateurs, useAnnees } from "@/hooks/useApi";
+import { useLoisMesuresActions } from "@/hooks/useLoisMesuresActions";
 
 export default function DataQualitativeTab() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,10 +17,12 @@ export default function DataQualitativeTab() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingItem, setEditingItem] = useState<any>(null);
   const [currentIndicatorId, setCurrentIndicatorId] = useState<string>("");
+  const [selectedLMMAs, setSelectedLMMAs] = useState<string[]>([]);
 
   const { data: qualitativeData, loading } = useDataQualitative();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
+  const { loisMesuresActions } = useLoisMesuresActions();
 
   // Filter data
   const filteredData = (qualitativeData || []).filter(
@@ -79,48 +82,58 @@ export default function DataQualitativeTab() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const itemData = {
-      lmaTitre: formData.get("lmaTitre"),
-      lmaType: formData.get("lmaType"),
-      annee: parseInt(formData.get("annee") as string),
-      ordre: formData.get("ordre")
-        ? parseInt(formData.get("ordre") as string)
-        : undefined,
-      notes: formData.get("notes") || "",
-    };
+    // Get selected LMMA IDs from checkboxes
+    const selectedLMMAIds = Array.from(
+      formData.getAll("loisMesuresActions")
+    ) as string[];
+
+    if (selectedLMMAIds.length === 0) {
+      alert("Veuillez sélectionner au moins une Loi/Mesure/Action");
+      return;
+    }
+
+    const annee = parseInt(formData.get("annee") as string);
+    const ordre = formData.get("ordre")
+      ? parseInt(formData.get("ordre") as string)
+      : undefined;
+    const notes = (formData.get("notes") as string) || "";
+
+    // Create multiple items, one for each selected LMMA
+    const items = selectedLMMAIds.map((lmmaId, index) => ({
+      loisMesuresActions: lmmaId,
+      annee: annee,
+      ordre: ordre ? ordre + index : index + 1,
+      notes: notes,
+    }));
 
     try {
-      const url = `/api/data-liste/${currentIndicatorId}/items${
-        editingItem ? `/${editingItem._id}` : ""
-      }`;
-      const method = editingItem ? "PATCH" : "POST";
+      // Add all selected LMMA as separate items
+      for (const itemData of items) {
+        const res = await fetch(`/api/data-liste/${currentIndicatorId}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(itemData),
+        });
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(itemData),
-      });
-
-      if (res.ok) {
-        setIsItemModalOpen(false);
-        setEditingItem(null);
-        setCurrentIndicatorId("");
-        alert(
-          editingItem
-            ? "Item LMMA modifié avec succès !"
-            : "Item LMMA ajouté avec succès !"
-        );
-        window.location.reload();
-      } else {
-        const errorData = await res.json();
-        alert(
-          `Erreur lors de l'enregistrement: ${
-            errorData.error || "Une erreur est survenue"
-          }\n\nVeuillez vérifier que tous les champs requis sont correctement remplis.`
-        );
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(
+            `Erreur lors de l'ajout d'un item: ${
+              errorData.error || "Une erreur est survenue"
+            }`
+          );
+          return;
+        }
       }
+
+      setIsItemModalOpen(false);
+      setEditingItem(null);
+      setCurrentIndicatorId("");
+      setSelectedLMMAs([]);
+      alert(`${selectedLMMAIds.length} item(s) LMMA ajouté(s) avec succès !`);
+      window.location.reload();
     } catch (error) {
-      console.error("Error saving item:", error);
+      console.error("Error saving items:", error);
       alert(
         "Erreur de connexion lors de l'enregistrement.\n\nVeuillez vérifier votre connexion internet et réessayer."
       );
@@ -485,19 +498,20 @@ export default function DataQualitativeTab() {
         </div>
       )}
 
-      {/* Modal for Item CRUD */}
+      {/* Modal for Item LMMA Selection */}
       {isItemModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {editingItem ? "Modifier l'Item LMMA" : "Nouvel Item LMMA"}
+                Sélectionner des Lois/Mesures/Actions
               </h2>
               <button
                 onClick={() => {
                   setIsItemModalOpen(false);
                   setEditingItem(null);
                   setCurrentIndicatorId("");
+                  setSelectedLMMAs([]);
                 }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -506,39 +520,97 @@ export default function DataQualitativeTab() {
             </div>
 
             <form onSubmit={handleItemSubmit} className="p-6 space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Titre de la Loi/Mesure/Action *
-                </label>
-                <input
-                  type="text"
-                  name="lmaTitre"
-                  required
-                  defaultValue={editingItem?.loisMesuresActions?.titre}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                  placeholder="Ex: Loi sur la parité..."
-                />
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Instructions:</strong> Sélectionnez une ou plusieurs
+                  Lois/Mesures/Actions existantes de la collection à associer à
+                  cet indicateur. Vous pouvez sélectionner plusieurs items en
+                  cochant les cases.
+                </p>
               </div>
 
+              {/* LMMA Selection List */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Type *
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Lois, Mesures & Actions disponibles *
                 </label>
-                <select
-                  name="lmaType"
-                  required
-                  defaultValue={editingItem?.loisMesuresActions?.type}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Sélectionner un type</option>
-                  <option value="Loi">Loi</option>
-                  <option value="Mesure">Mesure</option>
-                  <option value="Action">Action</option>
-                  <option value="Politique">Politique</option>
-                  <option value="Mécanisme">Mécanisme</option>
-                </select>
+                <div className="border border-gray-300 dark:border-slate-600 rounded-lg max-h-96 overflow-y-auto">
+                  {!loisMesuresActions || loisMesuresActions.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                      Aucune loi/mesure/action disponible. Veuillez d&apos;abord
+                      en créer dans la section Référentiel.
+                    </div>
+                  ) : (
+                    loisMesuresActions.map(
+                      (lmma: {
+                        _id: string;
+                        nom: string;
+                        type: { nom: string };
+                        annee?: number;
+                        reference?: string;
+                        statut?: string;
+                      }) => (
+                        <label
+                          key={lmma._id}
+                          className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-gray-200 dark:border-slate-700 last:border-b-0"
+                        >
+                          <input
+                            type="checkbox"
+                            name="loisMesuresActions"
+                            value={lmma._id}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedLMMAs((prev) => [...prev, lmma._id]);
+                              } else {
+                                setSelectedLMMAs((prev) =>
+                                  prev.filter((id) => id !== lmma._id)
+                                );
+                              }
+                            }}
+                            className="mt-1 w-5 h-5 text-bleu-rdc focus:ring-bleu-rdc border-gray-300 rounded"
+                          />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {lmma.nom}
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                {lmma.type.nom}
+                              </span>
+                              {lmma.annee && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                  {lmma.annee}
+                                </span>
+                              )}
+                              {lmma.statut && (
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                    lmma.statut === "en vigueur"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                  }`}
+                                >
+                                  {lmma.statut}
+                                </span>
+                              )}
+                            </div>
+                            {lmma.reference && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                Réf: {lmma.reference}
+                              </p>
+                            )}
+                          </div>
+                        </label>
+                      )
+                    )
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  {selectedLMMAs.length} item(s) sélectionné(s)
+                </p>
               </div>
 
+              {/* Common fields for all selected items */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -561,21 +633,24 @@ export default function DataQualitativeTab() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ordre
+                    Ordre de départ
                   </label>
                   <input
                     type="number"
                     name="ordre"
-                    defaultValue={editingItem?.ordre}
+                    defaultValue={1}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     placeholder="Ex: 1, 2, 3..."
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Les items suivants seront incrémentés automatiquement
+                  </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Notes
+                  Notes (communes à tous les items sélectionnés)
                 </label>
                 <textarea
                   name="notes"
@@ -593,6 +668,7 @@ export default function DataQualitativeTab() {
                     setIsItemModalOpen(false);
                     setEditingItem(null);
                     setCurrentIndicatorId("");
+                    setSelectedLMMAs([]);
                   }}
                   className="px-6 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                 >
@@ -600,9 +676,10 @@ export default function DataQualitativeTab() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors"
+                  disabled={selectedLMMAs.length === 0}
+                  className="px-6 py-2 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingItem ? "Mettre à jour" : "Ajouter"}
+                  Ajouter ({selectedLMMAs.length})
                 </button>
               </div>
             </form>
