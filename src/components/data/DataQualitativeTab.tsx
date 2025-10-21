@@ -42,7 +42,7 @@ export default function DataQualitativeTab() {
       const url = editingData
         ? `/api/data-liste/${editingData._id}`
         : "/api/data-liste";
-      const method = editingData ? "PUT" : "POST";
+      const method = editingData ? "PATCH" : "POST";
 
       const res = await fetch(url, {
         method,
@@ -53,11 +53,25 @@ export default function DataQualitativeTab() {
       if (res.ok) {
         setIsModalOpen(false);
         setEditingData(null);
+        alert(
+          editingData
+            ? "Indicateur modifié avec succès !"
+            : "Indicateur créé avec succès ! Vous pouvez maintenant ajouter des items LMMA en cliquant sur le bouton vert '+'."
+        );
         window.location.reload();
+      } else {
+        const errorData = await res.json();
+        alert(
+          `Erreur lors de l'enregistrement: ${
+            errorData.error || "Une erreur est survenue"
+          }\n\nVeuillez vérifier que tous les champs requis sont correctement remplis.`
+        );
       }
     } catch (error) {
       console.error("Error saving data:", error);
-      alert("Erreur lors de l'enregistrement");
+      alert(
+        "Erreur de connexion lors de l'enregistrement.\n\nVeuillez vérifier votre connexion internet et réessayer."
+      );
     }
   };
 
@@ -91,11 +105,25 @@ export default function DataQualitativeTab() {
         setIsItemModalOpen(false);
         setEditingItem(null);
         setCurrentIndicatorId("");
+        alert(
+          editingItem
+            ? "Item LMMA modifié avec succès !"
+            : "Item LMMA ajouté avec succès !"
+        );
         window.location.reload();
+      } else {
+        const errorData = await res.json();
+        alert(
+          `Erreur lors de l'enregistrement: ${
+            errorData.error || "Une erreur est survenue"
+          }\n\nVeuillez vérifier que tous les champs requis sont correctement remplis.`
+        );
       }
     } catch (error) {
       console.error("Error saving item:", error);
-      alert("Erreur lors de l'enregistrement");
+      alert(
+        "Erreur de connexion lors de l'enregistrement.\n\nVeuillez vérifier votre connexion internet et réessayer."
+      );
     }
   };
 
@@ -252,10 +280,16 @@ export default function DataQualitativeTab() {
               <div className="flex gap-2">
                 <button
                   onClick={() => openAddItemModal(item._id)}
-                  className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                  title="Ajouter un item LMMA"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
+                  title="Ajouter un item LMMA (Loi, Mesure ou Action)"
                 >
                   <Plus className="w-5 h-5" />
+                  <span className="hidden sm:inline">Ajouter LMMA</span>
+                  {item.items && item.items.length > 0 && (
+                    <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                      {item.items.length}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => {
@@ -263,7 +297,7 @@ export default function DataQualitativeTab() {
                     setIsModalOpen(true);
                   }}
                   className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                  title="Modifier"
+                  title="Modifier l'indicateur"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -378,7 +412,7 @@ export default function DataQualitativeTab() {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Indicateur *
+                  Indicateur Qualitatif *
                 </label>
                 <select
                   name="indicateur"
@@ -386,13 +420,20 @@ export default function DataQualitativeTab() {
                   defaultValue={editingData?.indicateur._id}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 >
-                  <option value="">Sélectionner un indicateur</option>
-                  {indicateurs?.map((ind) => (
-                    <option key={ind._id} value={ind._id}>
-                      {ind.code} - {ind.nom}
-                    </option>
-                  ))}
+                  <option value="">
+                    Sélectionner un indicateur qualitatif
+                  </option>
+                  {indicateurs
+                    ?.filter((ind) => ind.type === "qualitatif")
+                    .map((ind) => (
+                      <option key={ind._id} value={ind._id}>
+                        {ind.code} - {ind.nom}
+                      </option>
+                    ))}
                 </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Seuls les indicateurs de type qualitatif sont affichés
+                </p>
               </div>
 
               <div>
