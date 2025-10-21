@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { Plus, Edit2, Trash2, Search, X } from "lucide-react";
-import { useDataNumeric, useIndicateurs, useAnnees } from "@/hooks/useApi";
+import {
+  useDataNumeric,
+  useIndicateurs,
+  useAnnees,
+  useCibles,
+} from "@/hooks/useApi";
 
 export default function DataNumericNationalTab() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,6 +21,7 @@ export default function DataNumericNationalTab() {
   const { data: allData, loading } = useDataNumeric();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
+  const { data: cibles } = useCibles();
 
   // Filter for national data only (province is null)
   const nationalData = (allData || []).filter((item) => !item.province);
@@ -349,6 +355,24 @@ export default function DataNumericNationalTab() {
                       <option value="Total">Total</option>
                       <option value="Homme">Homme</option>
                       <option value="Femme">Femme</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Cible
+                    </label>
+                    <select
+                      name="cible"
+                      defaultValue={editingData?.cible?._id || ""}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Aucune</option>
+                      {cibles?.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.nom}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

@@ -159,6 +159,19 @@ export function useAnnees(options: UseApiOptions = {}) {
 }
 
 /**
+ * Hook for fetching cibles
+ */
+export function useCibles(options: UseApiOptions = {}) {
+  return useApi<
+    Array<{
+      _id: string;
+      nom: string;
+      ordre?: number;
+    }>
+  >("/api/cibles", options);
+}
+
+/**
  * Hook for fetching numeric data
  */
 export function useDataNumeric(
@@ -231,5 +244,5 @@ export function useDataQualitative(options: UseApiOptions = {}) {
       description?: string;
       source?: string;
     }>
-  >("/api/data-qualitative", options);
+  >("/api/data-liste", options);
 }

@@ -7,6 +7,7 @@ import {
   useIndicateurs,
   useAnnees,
   useProvinces,
+  useCibles,
 } from "@/hooks/useApi";
 
 export default function DataNumericProvincialTab() {
@@ -23,6 +24,7 @@ export default function DataNumericProvincialTab() {
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
   const { data: provinces } = useProvinces();
+  const { data: cibles } = useCibles();
 
   // Filter for provincial data only (province is not null)
   const provincialData = (allData || []).filter((item) => item.province);
@@ -396,6 +398,26 @@ export default function DataNumericProvincialTab() {
                     </select>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Cible
+                    </label>
+                    <select
+                      name="cible"
+                      defaultValue={editingData?.cible?._id || ""}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Aucune</option>
+                      {cibles?.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Valeur *

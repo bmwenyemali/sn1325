@@ -63,7 +63,7 @@ export function Header() {
                   <span>TB</span>
                 </Link>
                 <Link
-                  href="/admin/dashboard/donnees/saisie"
+                  href="/admin/dashboard/donnees"
                   className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
                 >
                   <Database className="w-4 h-4" />
@@ -192,7 +192,7 @@ export function Header() {
                     <span>Tableau de bord</span>
                   </Link>
                   <Link
-                    href="/admin/dashboard/donnees/saisie"
+                    href="/admin/dashboard/donnees"
                     className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors px-4 py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
