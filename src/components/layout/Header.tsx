@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -22,8 +23,30 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session } = useSession();
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const isActive = (path: string) => {
+    return pathname === path || pathname?.startsWith(path + "/");
+  };
+
+  const getLinkClasses = (path: string) => {
+    const baseClasses = "flex items-center space-x-2 transition-colors";
+    if (isActive(path)) {
+      return `${baseClasses} text-jaune-rdc dark:text-jaune-rdc font-semibold`;
+    }
+    return `${baseClasses} text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc`;
+  };
+
+  const getMobileLinkClasses = (path: string) => {
+    const baseClasses =
+      "flex items-center space-x-2 px-4 py-2 transition-colors";
+    if (isActive(path)) {
+      return `${baseClasses} text-jaune-rdc dark:text-jaune-rdc font-semibold bg-bleu-rdc/10 dark:bg-jaune-rdc/10`;
+    }
+    return `${baseClasses} text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc`;
+  };
 
   return (
     <header className="bg-white dark:bg-slate-900 shadow-lg border-b-4 border-bleu-rdc sticky top-0 z-50 transition-colors">
@@ -57,42 +80,42 @@ export function Header() {
               <>
                 <Link
                   href="/admin/dashboard"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard")}
                 >
                   <Home className="w-4 h-4" />
                   <span>TB</span>
                 </Link>
                 <Link
                   href="/admin/dashboard/donnees"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard/donnees")}
                 >
                   <Database className="w-4 h-4" />
                   <span>Données</span>
                 </Link>
                 <Link
                   href="/admin/dashboard/referentiel"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard/referentiel")}
                 >
                   <BookOpen className="w-4 h-4" />
                   <span>Références</span>
                 </Link>
                 <Link
                   href="/admin/dashboard/structures"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard/structures")}
                 >
                   <Building2 className="w-4 h-4" />
                   <span>Structures</span>
                 </Link>
                 <Link
                   href="/admin/dashboard/utilisateurs"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard/utilisateurs")}
                 >
                   <Users className="w-4 h-4" />
                   <span>Users</span>
                 </Link>
                 <Link
                   href="/admin/dashboard/parametres"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/admin/dashboard/parametres")}
                 >
                   <Settings className="w-4 h-4" />
                   <span>Paramètres</span>
@@ -105,28 +128,28 @@ export function Header() {
               <>
                 <Link
                   href="/user/dashboard"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/user/dashboard")}
                 >
                   <Home className="w-4 h-4" />
                   <span>Tableau de bord</span>
                 </Link>
                 <Link
                   href="/user/dashboard/donnees"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/user/dashboard/donnees")}
                 >
                   <Database className="w-4 h-4" />
                   <span>Données</span>
                 </Link>
                 <Link
                   href="/user/dashboard/statistiques"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/user/dashboard/statistiques")}
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>Statistiques</span>
                 </Link>
                 <Link
                   href="/user/dashboard/structures"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
+                  className={getLinkClasses("/user/dashboard/structures")}
                 >
                   <Building2 className="w-4 h-4" />
                   <span>Structures</span>
@@ -135,10 +158,7 @@ export function Header() {
             )}
 
             {/* À propos - Always visible */}
-            <Link
-              href="/about"
-              className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-bleu-rdc dark:hover:text-jaune-rdc transition-colors"
-            >
+            <Link href="/about" className={getLinkClasses("/about")}>
               <FileText className="w-4 h-4" />
               <span>À propos</span>
             </Link>

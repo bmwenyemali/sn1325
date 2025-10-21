@@ -1,14 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import {
-  BarChart3,
+  Users,
+  MapPin,
+  Calendar,
+  FileText,
   TrendingUp,
-  PieChart as PieChartIcon,
-  LineChart as LineChartIcon,
-  Filter,
+  BarChart3,
 } from "lucide-react";
-import { useAxes, useIndicateurs, useProvinces } from "@/hooks/useApi";
+import {
+  useAxes,
+  useIndicateurs,
+  useProvinces,
+  useDataNumeric,
+  useDataQualitative,
+} from "@/hooks/useApi";
 import {
   BarChart,
   Bar,
@@ -23,6 +30,8 @@ import {
   Legend,
   ResponsiveContainer,
   Cell,
+  AreaChart,
+  Area,
 } from "recharts";
 
 const COLORS = [
@@ -32,6 +41,10 @@ const COLORS = [
   "#FF8042",
   "#8884D8",
   "#82CA9D",
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#FFA07A",
 ];
 
 interface Indicateur {
@@ -39,209 +52,289 @@ interface Indicateur {
   nom: string;
   type: string;
   axe: { _id: string; nom: string; numero: number };
-  desagregableParSexe?: boolean;
-  desagregableParProvince?: boolean;
-  desagregableParAnnee?: boolean;
-  avecCible?: boolean;
 }
 
 export default function UserStatistiquesPage() {
   const { data: axesData } = useAxes();
   const { data: indicateursData } = useIndicateurs();
   const { data: provincesData } = useProvinces();
-  const [selectedChart, setSelectedChart] = useState<"bar" | "pie" | "line">(
-    "bar"
-  );
+  const { data: numericData } = useDataNumeric();
+  const { data: qualitativeData } = useDataQualitative();
 
   const axes = axesData || [];
   const indicateurs: Indicateur[] = (indicateursData as Indicateur[]) || [];
   const provinces = provincesData || [];
 
-  // Préparer les données pour les graphiques
-  const indicateursParAxe = axes.map((axe) => ({
-    name: `Axe ${axe.numero}`,
-    indicateurs: indicateurs.filter((ind) => ind.axe?._id === axe._id).length,
-    axeComplet: axe.nom,
-  }));
+  // Real data statistics calculations
+  const stats = useMemo(() => {
+    const nationalData = (numericData || []).filter((item) => !item.province);
+    const provincialData = (numericData || []).filter((item) => item.province);
+    const lmmaData = qualitativeData || [];
 
-  const indicateursParType = [
-    {
-      name: "Numérique",
-      value: indicateurs.filter((ind) => ind.type === "Numerique").length,
-    },
-    {
-      name: "Province",
-      value: indicateurs.filter((ind) => ind.type === "Province").length,
-    },
-    {
-      name: "Liste",
-      value: indicateurs.filter((ind) => ind.type === "Liste").length,
-    },
-  ].filter((item) => item.value > 0);
+    const totalLMMA = lmmaData.reduce(
+      (sum, item) => sum + (item.items?.length || 0),
+      0
+    );
 
-  // Données simulées pour la tendance temporelle
-  const tendanceData = [
-    { mois: "Jan", donnees: 45, cible: 50 },
-    { mois: "Fev", donnees: 52, cible: 50 },
-    { mois: "Mar", donnees: 61, cible: 60 },
-    { mois: "Avr", donnees: 58, cible: 60 },
-    { mois: "Mai", donnees: 69, cible: 70 },
-    { mois: "Juin", donnees: 75, cible: 70 },
-  ];
+    return {
+      totalNationalData: nationalData.length,
+      totalProvincialData: provincialData.length,
+      totalQualitativeData: lmmaData.length,
+      totalLMMA,
+      totalIndicators: indicateurs.length,
+      totalProvinces: provinces.length,
+    };
+  }, [numericData, qualitativeData, indicateurs, provinces]);
 
-  // Statistiques des indicateurs désagrégés
-  const desagregationStats = [
-    {
-      name: "Par Sexe",
-      value: indicateurs.filter((ind) => ind.desagregableParSexe).length,
-    },
-    {
-      name: "Par Province",
-      value: indicateurs.filter((ind) => ind.desagregableParProvince).length,
-    },
-    {
-      name: "Par Année",
-      value: indicateurs.filter((ind) => ind.desagregableParAnnee).length,
-    },
-    {
-      name: "Avec Cible",
-      value: indicateurs.filter((ind) => ind.avecCible).length,
-    },
-  ];
+  // Data by year
+  const dataByYear = useMemo(() => {
+    const yearCounts: Record<
+      number,
+      { annee: number; national: number; provincial: number; lmma: number }
+    > = {};
+
+    (numericData || []).forEach((item) => {
+      if (!yearCounts[item.annee]) {
+        yearCounts[item.annee] = {
+          annee: item.annee,
+          national: 0,
+          provincial: 0,
+          lmma: 0,
+        };
+      }
+      if (item.province) {
+        yearCounts[item.annee].provincial++;
+      } else {
+        yearCounts[item.annee].national++;
+      }
+    });
+
+    (qualitativeData || []).forEach((item) => {
+      item.items?.forEach((lmma: { annee: number }) => {
+        if (!yearCounts[lmma.annee]) {
+          yearCounts[lmma.annee] = {
+            annee: lmma.annee,
+            national: 0,
+            provincial: 0,
+            lmma: 0,
+          };
+        }
+        yearCounts[lmma.annee].lmma++;
+      });
+    });
+
+    return Object.values(yearCounts).sort((a, b) => a.annee - b.annee);
+  }, [numericData, qualitativeData]);
+
+  // Data by gender
+  const dataByGender = useMemo(() => {
+    const genderCounts: Record<string, number> = {
+      Homme: 0,
+      Femme: 0,
+      Total: 0,
+    };
+
+    (numericData || []).forEach((item) => {
+      const sexe = item.sexe || "Total";
+      genderCounts[sexe] = (genderCounts[sexe] || 0) + 1;
+    });
+
+    return Object.entries(genderCounts)
+      .filter(([, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }));
+  }, [numericData]);
+
+  // Data by province (top 10)
+  const dataByProvince = useMemo(() => {
+    const provinceCounts: Record<string, number> = {};
+
+    (numericData || [])
+      .filter((item) => item.province)
+      .forEach((item) => {
+        const provinceName = item.province!.nom;
+        provinceCounts[provinceName] = (provinceCounts[provinceName] || 0) + 1;
+      });
+
+    return Object.entries(provinceCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  }, [numericData]);
+
+  // Data by axe
+  const dataByAxe = useMemo(() => {
+    const axeCounts: Record<
+      string,
+      { name: string; numero: number; indicateurs: number; donnees: number }
+    > = {};
+
+    axes.forEach((axe) => {
+      axeCounts[axe._id] = {
+        name: `Axe ${axe.numero}`,
+        numero: axe.numero,
+        indicateurs: 0,
+        donnees: 0,
+      };
+    });
+
+    indicateurs.forEach((ind) => {
+      if (ind.axe && axeCounts[ind.axe._id]) {
+        axeCounts[ind.axe._id].indicateurs++;
+      }
+    });
+
+    (numericData || []).forEach((item) => {
+      // Find the axe for this indicator
+      const indicator = indicateurs.find(
+        (ind) => ind._id === item.indicateur._id
+      );
+      if (indicator && indicator.axe && axeCounts[indicator.axe._id]) {
+        axeCounts[indicator.axe._id].donnees++;
+      }
+    });
+
+    return Object.values(axeCounts)
+      .filter((item) => item.indicateurs > 0 || item.donnees > 0)
+      .sort((a, b) => a.numero - b.numero);
+  }, [axes, indicateurs, numericData]);
+
+  // LMMA by type
+  const lmmaByType = useMemo(() => {
+    const typeCounts: Record<string, number> = {};
+
+    (qualitativeData || []).forEach((item) => {
+      item.items?.forEach((lmma: { loisMesuresActions: { type: string } }) => {
+        const type = lmma.loisMesuresActions.type;
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+    });
+
+    return Object.entries(typeCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [qualitativeData]);
+
+  // Gender trends over time
+  const genderTrends = useMemo(() => {
+    const trends: Record<
+      number,
+      { annee: number; Homme: number; Femme: number; Total: number }
+    > = {};
+
+    (numericData || [])
+      .filter((item) => !item.province)
+      .forEach((item) => {
+        if (!trends[item.annee]) {
+          trends[item.annee] = {
+            annee: item.annee,
+            Homme: 0,
+            Femme: 0,
+            Total: 0,
+          };
+        }
+        const sexe = item.sexe || "Total";
+        trends[item.annee][sexe as "Homme" | "Femme" | "Total"]++;
+      });
+
+    return Object.values(trends).sort((a, b) => a.annee - b.annee);
+  }, [numericData]);
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Statistiques et Analyses
+          Tableau de Bord Statistique
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Visualisations graphiques et analyses statistiques des données
+          Analyses et visualisations des données SN1325
         </p>
       </div>
 
-      {/* Chart Type Selector */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button
-          onClick={() => setSelectedChart("bar")}
-          className={`p-6 rounded-xl shadow-lg transition-all ${
-            selectedChart === "bar"
-              ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:shadow-xl"
-          }`}
-        >
-          <BarChart3 className="w-10 h-10 mb-4 mx-auto" />
-          <h3 className="text-xl font-bold mb-2">Graphiques en Barres</h3>
-          <p
-            className={`text-sm ${
-              selectedChart === "bar"
-                ? "text-blue-100"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            Comparaisons et évolutions
-          </p>
-        </button>
+      {/* Key Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <FileText className="w-10 h-10 opacity-80" />
+            <div className="text-right">
+              <div className="text-3xl font-bold">
+                {stats.totalNationalData}
+              </div>
+              <div className="text-sm opacity-80">Données Nationales</div>
+            </div>
+          </div>
+        </div>
 
-        <button
-          onClick={() => setSelectedChart("pie")}
-          className={`p-6 rounded-xl shadow-lg transition-all ${
-            selectedChart === "pie"
-              ? "bg-gradient-to-br from-green-500 to-green-600 text-white"
-              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:shadow-xl"
-          }`}
-        >
-          <PieChartIcon className="w-10 h-10 mb-4 mx-auto" />
-          <h3 className="text-xl font-bold mb-2">Graphiques Circulaires</h3>
-          <p
-            className={`text-sm ${
-              selectedChart === "pie"
-                ? "text-green-100"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            Répartitions et proportions
-          </p>
-        </button>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <MapPin className="w-10 h-10 opacity-80" />
+            <div className="text-right">
+              <div className="text-3xl font-bold">
+                {stats.totalProvincialData}
+              </div>
+              <div className="text-sm opacity-80">Données Provinciales</div>
+            </div>
+          </div>
+        </div>
 
-        <button
-          onClick={() => setSelectedChart("line")}
-          className={`p-6 rounded-xl shadow-lg transition-all ${
-            selectedChart === "line"
-              ? "bg-gradient-to-br from-purple-500 to-purple-600 text-white"
-              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:shadow-xl"
-          }`}
-        >
-          <LineChartIcon className="w-10 h-10 mb-4 mx-auto" />
-          <h3 className="text-xl font-bold mb-2">Graphiques Linéaires</h3>
-          <p
-            className={`text-sm ${
-              selectedChart === "line"
-                ? "text-purple-100"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            Tendances temporelles
-          </p>
-        </button>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <BarChart3 className="w-10 h-10 opacity-80" />
+            <div className="text-right">
+              <div className="text-3xl font-bold">{stats.totalLMMA}</div>
+              <div className="text-sm opacity-80">Lois, Mesures & Actions</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <TrendingUp className="w-10 h-10 opacity-80" />
+            <div className="text-right">
+              <div className="text-3xl font-bold">{stats.totalIndicators}</div>
+              <div className="text-sm opacity-80">Indicateurs</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Main Chart Display */}
-      {selectedChart === "bar" && (
+      {/* Charts Row 1: Axe Analysis */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Nombre d&apos;Indicateurs par Axe Stratégique
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <BarChart3 className="w-6 h-6" />
+            Données par Axe Stratégique
           </h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={indicateursParAxe}>
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={dataByAxe}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="bg-white dark:bg-slate-700 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-slate-600">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {payload[0].payload.axeComplet}
-                        </p>
-                        <p className="text-blue-600 dark:text-blue-400">
-                          Indicateurs: {payload[0].value}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
+              <Tooltip />
               <Legend />
-              <Bar
-                dataKey="indicateurs"
-                fill="#3B82F6"
-                name="Nombre d'indicateurs"
-              />
+              <Bar dataKey="indicateurs" fill="#3B82F6" name="Indicateurs" />
+              <Bar dataKey="donnees" fill="#10B981" name="Données encodées" />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      )}
 
-      {selectedChart === "pie" && (
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Répartition des Indicateurs par Type
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <Users className="w-6 h-6" />
+            Désagrégation par Sexe
           </h2>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
-                data={indicateursParType}
+                data={dataByGender}
                 cx="50%"
                 cy="50%"
-                label
                 outerRadius={120}
                 fill="#8884d8"
                 dataKey="value"
+                label
               >
-                {indicateursParType.map((entry, index) => (
+                {dataByGender.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
@@ -253,121 +346,123 @@ export default function UserStatistiquesPage() {
             </PieChart>
           </ResponsiveContainer>
         </div>
-      )}
+      </div>
 
-      {selectedChart === "line" && (
+      {/* Charts Row 2: Temporal Analysis */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <Calendar className="w-6 h-6" />
+          Évolution Temporelle des Données
+        </h2>
+        <ResponsiveContainer width="100%" height={400}>
+          <AreaChart data={dataByYear}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="annee" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Area
+              type="monotone"
+              dataKey="national"
+              stackId="1"
+              stroke="#3B82F6"
+              fill="#3B82F6"
+              name="National"
+            />
+            <Area
+              type="monotone"
+              dataKey="provincial"
+              stackId="1"
+              stroke="#10B981"
+              fill="#10B981"
+              name="Provincial"
+            />
+            <Area
+              type="monotone"
+              dataKey="lmma"
+              stackId="1"
+              stroke="#8B5CF6"
+              fill="#8B5CF6"
+              name="LMMA"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Charts Row 3: Provincial & Gender Trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Évolution de la Collecte de Données (2025)
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <MapPin className="w-6 h-6" />
+            Top 10 Provinces
           </h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={tendanceData}>
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={dataByProvince} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mois" />
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" width={100} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#10B981" name="Données" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <Users className="w-6 h-6" />
+            Tendance Genre par Année
+          </h2>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={genderTrends}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="annee" />
               <YAxis />
               <Tooltip />
               <Legend />
               <Line
                 type="monotone"
-                dataKey="donnees"
-                stroke="#8B5CF6"
-                strokeWidth={3}
-                name="Données collectées"
-                dot={{ fill: "#8B5CF6", r: 5 }}
+                dataKey="Homme"
+                stroke="#3B82F6"
+                strokeWidth={2}
+                name="Homme"
               />
               <Line
                 type="monotone"
-                dataKey="cible"
-                stroke="#10B981"
+                dataKey="Femme"
+                stroke="#EC4899"
                 strokeWidth={2}
-                strokeDasharray="5 5"
-                name="Cible"
-                dot={{ fill: "#10B981", r: 4 }}
+                name="Femme"
+              />
+              <Line
+                type="monotone"
+                dataKey="Total"
+                stroke="#6B7280"
+                strokeWidth={2}
+                name="Total"
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* LMMA Analysis */}
+      {lmmaByType.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <FileText className="w-6 h-6" />
+            Répartition des Lois, Mesures & Actions
+          </h2>
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={lmmaByType}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8B5CF6" name="Nombre" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )}
-
-      {/* Désagrégation Statistics */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-          <Filter className="w-6 h-6 mr-3 text-bleu-rdc dark:text-jaune-rdc" />
-          Capacités de Désagrégation des Indicateurs
-        </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={desagregationStats} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis dataKey="name" type="category" width={120} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#F59E0B" name="Nombre d'indicateurs" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Statistics Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Total Axes
-          </h3>
-          <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-            {axes.length}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Axes stratégiques
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Total Indicateurs
-          </h3>
-          <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
-            {indicateurs.length}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Indicateurs suivis
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Provinces
-          </h3>
-          <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-            {provinces.length}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Couverture nationale
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Taux de Réalisation
-          </h3>
-          <div className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-            87%
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Objectifs 2025
-          </p>
-        </div>
-      </div>
-
-      {/* Info Note */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 rounded-r-lg">
-        <div className="flex items-start">
-          <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            <strong>Note:</strong> Les graphiques affichent les données en temps
-            réel basées sur les indicateurs et axes configurés dans le système.
-            Les données de tendance sont simulées pour démonstration.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
