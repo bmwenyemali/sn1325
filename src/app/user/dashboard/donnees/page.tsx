@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Database, ListChecks, MapPin } from "lucide-react";
+import UserDataNumericNationalTab from "@/components/data/UserDataNumericNationalTab";
+import UserDataNumericProvincialTab from "@/components/data/UserDataNumericProvincialTab";
+import UserDataQualitativeTab from "@/components/data/UserDataQualitativeTab";
 
 type TabType = "national" | "provincial" | "qualitative";
 
@@ -50,7 +53,11 @@ export default function UserDonneesPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={isActive ? "border-bleu-rdc text-bleu-rdc" : "border-transparent text-gray-500"}
+                  className={
+                    isActive
+                      ? "border-bleu-rdc text-bleu-rdc"
+                      : "border-transparent text-gray-500"
+                  }
                 >
                   <Icon className="w-5 h-5 mr-2" />
                   <span>{tab.label}</span>
@@ -61,7 +68,9 @@ export default function UserDonneesPage() {
         </div>
 
         <div className="p-6">
-          <p>Tab content: {activeTab}</p>
+          {activeTab === "national" && <UserDataNumericNationalTab />}
+          {activeTab === "provincial" && <UserDataNumericProvincialTab />}
+          {activeTab === "qualitative" && <UserDataQualitativeTab />}
         </div>
       </div>
     </div>
