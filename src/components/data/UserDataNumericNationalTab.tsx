@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Download } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDataNumeric, useIndicateurs, useAnnees } from "@/hooks/useApi";
+
+const ITEMS_PER_PAGE = 50;
 
 export default function UserDataNumericNationalTab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [yearFilter, setYearFilter] = useState("all");
   const [sexeFilter, setSexeFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch data without province (national data)
   const { data: allData, loading } = useDataNumeric();
@@ -17,16 +20,28 @@ export default function UserDataNumericNationalTab() {
   // Filter for national data only (province is null)
   const nationalData = (allData || []).filter((item) => !item.province);
 
-  // Apply filters
-  const filteredData = nationalData.filter((item) => {
-    const matchesSearch =
-      item.indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.indicateur.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesYear =
-      yearFilter === "all" || item.annee.toString() === yearFilter;
-    const matchesSexe = sexeFilter === "all" || item.sexe === sexeFilter;
-    return matchesSearch && matchesYear && matchesSexe;
-  });
+  // Apply filters with useMemo for better performance
+  const filteredData = useMemo(() => {
+    return nationalData.filter((item) => {
+      const matchesSearch =
+        !searchTerm ||
+        item.indicateur?.nom
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        item.indicateur?.code?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesYear =
+        yearFilter === "all" || item.annee.toString() === yearFilter;
+      const matchesSexe = sexeFilter === "all" || item.sexe === sexeFilter;
+      return matchesSearch && matchesYear && matchesSexe;
+    });
+  }, [nationalData, searchTerm, yearFilter, sexeFilter]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
 
   const exportToCSV = () => {
     const headers = [
@@ -174,7 +189,7 @@ export default function UserDataNumericNationalTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-slate-600">
-              {filteredData.map((item, idx) => (
+              {paginatedData.map((item, idx) => (
                 <tr
                   key={item._id}
                   className={
@@ -213,6 +228,38 @@ export default function UserDataNumericNationalTab() {
         {filteredData.length === 0 && (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             Aucune donnée trouvée
+          </div>
+        )}
+
+        {/* Pagination */}
+        {filteredData.length > ITEMS_PER_PAGE && (
+          <div className="px-6 py-4 bg-gray-50 dark:bg-slate-700 border-t border-gray-200 dark:border-slate-600 flex items-center justify-between">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              Affichage {(currentPage - 1) * ITEMS_PER_PAGE + 1} à{" "}
+              {Math.min(currentPage * ITEMS_PER_PAGE, filteredData.length)} sur{" "}
+              {filteredData.length} résultats
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded border border-gray-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="px-4 py-1 text-sm">
+                Page {currentPage} sur {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded border border-gray-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         )}
       </div>

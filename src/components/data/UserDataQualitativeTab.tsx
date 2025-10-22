@@ -15,8 +15,9 @@ export default function UserDataQualitativeTab() {
   // Filter data
   const filteredData = (qualitativeData || []).filter(
     (item) =>
-      item.indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.indicateur.code.toLowerCase().includes(searchTerm.toLowerCase())
+      !searchTerm ||
+      item.indicateur?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.indicateur?.code?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const exportToCSV = () => {

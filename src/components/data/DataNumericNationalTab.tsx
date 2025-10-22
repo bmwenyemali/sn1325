@@ -29,8 +29,9 @@ export default function DataNumericNationalTab() {
   // Apply filters
   const filteredData = nationalData.filter((item) => {
     const matchesSearch =
-      item.indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.indicateur.code.toLowerCase().includes(searchTerm.toLowerCase());
+      !searchTerm ||
+      item.indicateur?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.indicateur?.code?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesYear =
       yearFilter === "all" || item.annee.toString() === yearFilter;
     const matchesSexe = sexeFilter === "all" || item.sexe === sexeFilter;

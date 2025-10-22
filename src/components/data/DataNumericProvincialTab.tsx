@@ -32,8 +32,9 @@ export default function DataNumericProvincialTab() {
   // Apply filters
   const filteredData = provincialData.filter((item) => {
     const matchesSearch =
-      item.indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.indicateur.code.toLowerCase().includes(searchTerm.toLowerCase());
+      !searchTerm ||
+      item.indicateur?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.indicateur?.code?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesYear =
       yearFilter === "all" || item.annee.toString() === yearFilter;
     const matchesProvince =
