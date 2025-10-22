@@ -16,6 +16,7 @@ import {
   Building2,
   Settings,
   LogOut,
+  TrendingUp,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -146,6 +147,13 @@ export function Header() {
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>Statistiques</span>
+                </Link>
+                <Link
+                  href="/user/dashboard/analyses"
+                  className={getLinkClasses("/user/dashboard/analyses")}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Analyses</span>
                 </Link>
                 <Link
                   href="/user/dashboard/structures"
@@ -290,6 +298,14 @@ export function Header() {
                   >
                     <BarChart3 className="w-4 h-4" />
                     <span>Statistiques</span>
+                  </Link>
+                  <Link
+                    href="/user/dashboard/analyses"
+                    className={getMobileLinkClasses("/user/dashboard/analyses")}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Analyses</span>
                   </Link>
                   <Link
                     href="/user/dashboard/structures"
