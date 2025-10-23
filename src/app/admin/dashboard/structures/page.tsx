@@ -96,6 +96,7 @@ export default function AdminStructuresPage() {
   // Filter structures
   const filteredStructures = (allStructures || []).filter((structure) => {
     const matchesSearch =
+      !searchTerm ||
       structure.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       structure.sigle?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || structure.type === typeFilter;

@@ -200,9 +200,10 @@ export default function IndicateursPage() {
 
   const filteredIndicateurs = indicateurs.filter((indicateur) => {
     const matchesSearch =
-      indicateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      indicateur.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      indicateur.description.toLowerCase().includes(searchTerm.toLowerCase());
+      !searchTerm ||
+      indicateur.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      indicateur.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      indicateur.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const axeId =
       typeof indicateur.axe === "object" ? indicateur.axe._id : indicateur.axe;
     const matchesAxe = !filterAxe || axeId === filterAxe;

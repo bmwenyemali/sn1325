@@ -42,7 +42,8 @@ export default function UserStructuresPage() {
 
   const filteredStructures = structuresArray.filter((structure) => {
     const matchesSearch =
-      structure.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      !searchTerm ||
+      structure.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       structure.sigle?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || structure.type === typeFilter;
     const matchesProvince =

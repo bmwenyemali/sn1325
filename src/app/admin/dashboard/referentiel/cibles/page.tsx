@@ -367,16 +367,19 @@ export default function CiblesPage() {
   };
 
   // Filtered data based on search
-  const filteredGrandesCategories = grandesCategories.filter((gc) =>
-    gc.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredGrandesCategories = grandesCategories.filter(
+    (gc) =>
+      !searchTerm || gc.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredCategories = categories.filter((cat) =>
-    cat.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter(
+    (cat) =>
+      !searchTerm || cat.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredCibles = cibles.filter((cible) =>
-    cible.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCibles = cibles.filter(
+    (cible) =>
+      !searchTerm || cible.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleNewClick = () => {

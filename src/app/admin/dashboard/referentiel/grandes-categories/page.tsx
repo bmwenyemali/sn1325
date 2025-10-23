@@ -109,8 +109,9 @@ export default function GrandesCategoriesPage() {
     setFormData({ nom: "", description: "", ordre: 0 });
   };
 
-  const filteredGrandesCategories = grandesCategories.filter((gc) =>
-    gc.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredGrandesCategories = grandesCategories.filter(
+    (gc) =>
+      !searchTerm || gc.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {

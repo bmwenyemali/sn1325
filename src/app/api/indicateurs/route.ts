@@ -3,6 +3,9 @@ import connectDB from "@/lib/mongodb";
 import { Indicateur } from "@/models";
 import { auth } from "../../../../auth";
 
+// Cache for 30 seconds
+export const revalidate = 30;
+
 // GET /api/indicateurs - Récupérer tous les indicateurs
 export async function GET(request: NextRequest) {
   try {

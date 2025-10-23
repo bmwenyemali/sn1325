@@ -127,9 +127,8 @@ export default function LoisMesuresActionsPage() {
   };
 
   const filteredLMMAs = (loisMesuresActions || []).filter((lmma: LMMA) => {
-    const matchesSearch = lmma.nom
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      !searchTerm || lmma.nom?.toLowerCase().includes(searchTerm.toLowerCase());
     const typeId = typeof lmma.type === "object" ? lmma.type._id : lmma.type;
     const matchesType = !filterType || typeId === filterType;
     const matchesStatut = !filterStatut || lmma.statut === filterStatut;

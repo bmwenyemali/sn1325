@@ -126,8 +126,9 @@ export default function AxesPage() {
 
   const filteredAxes = axes.filter(
     (axe) =>
-      axe.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      axe.description.toLowerCase().includes(searchTerm.toLowerCase())
+      !searchTerm ||
+      axe.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      axe.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {

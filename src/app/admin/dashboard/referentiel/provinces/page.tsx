@@ -116,11 +116,12 @@ export default function ProvincesPage() {
   };
 
   const filteredProvinces = provinces.filter((province) => {
+    if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
-      province.nom.toLowerCase().includes(search) ||
-      (province.code && province.code.toLowerCase().includes(search)) ||
-      (province.region && province.region.toLowerCase().includes(search))
+      province.nom?.toLowerCase().includes(search) ||
+      province.code?.toLowerCase().includes(search) ||
+      province.region?.toLowerCase().includes(search)
     );
   });
 

@@ -171,11 +171,11 @@ export default function UsersManagementPage() {
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.organisation &&
-        user.organisation.toLowerCase().includes(searchTerm.toLowerCase()));
+      !searchTerm ||
+      user.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.organisation?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       filterStatus === "all" || user.statut === filterStatus;

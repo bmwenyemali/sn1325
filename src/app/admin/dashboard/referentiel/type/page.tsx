@@ -105,8 +105,9 @@ export default function StructureTypesPage() {
     setFormData({ nom: "", description: "", ordre: 0 });
   };
 
-  const filteredTypes = types.filter((type) =>
-    type.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTypes = types.filter(
+    (type) =>
+      !searchTerm || type.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {

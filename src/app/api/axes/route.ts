@@ -3,6 +3,9 @@ import connectDB from "@/lib/mongodb";
 import { Axe } from "@/models";
 import { auth } from "../../../../auth";
 
+// Cache for 30 seconds
+export const revalidate = 30;
+
 // GET /api/axes - Récupérer tous les axes
 export async function GET() {
   try {

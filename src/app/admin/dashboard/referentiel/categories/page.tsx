@@ -231,12 +231,14 @@ export default function CategoriesPage() {
     setShowModal(false);
   };
 
-  const filteredGrandes = grandesCategories.filter((item) =>
-    item.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredGrandes = grandesCategories.filter(
+    (item) =>
+      !searchTerm || item.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredCategories = categories.filter((item) =>
-    item.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter(
+    (item) =>
+      !searchTerm || item.nom?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {

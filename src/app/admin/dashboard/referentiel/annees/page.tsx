@@ -112,10 +112,11 @@ export default function AnneesPage() {
   };
 
   const filteredAnnees = annees.filter((annee) => {
+    if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
       annee.annee.toString().includes(search) ||
-      (annee.libelle && annee.libelle.toLowerCase().includes(search))
+      annee.libelle?.toLowerCase().includes(search)
     );
   });
 

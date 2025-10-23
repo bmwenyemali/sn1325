@@ -3,6 +3,9 @@ import { auth } from "../../../../auth";
 import dbConnect from "@/lib/mongodb";
 import Annee from "@/models/Annee";
 
+// Cache for 30 seconds
+export const revalidate = 30;
+
 // GET all years
 export async function GET() {
   try {

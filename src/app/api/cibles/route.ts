@@ -3,6 +3,9 @@ import { auth } from "../../../../auth";
 import connectDB from "@/lib/db";
 import Cible from "@/models/Cible";
 
+// Cache for 30 seconds
+export const revalidate = 30;
+
 // GET /api/cibles - Get all cibles
 export async function GET(request: NextRequest) {
   try {
