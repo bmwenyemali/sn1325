@@ -197,7 +197,7 @@ export default function UsersManagementPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="btn-primary flex items-center space-x-2"
+          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-bleu-rdc to-blue-600 hover:from-bleu-rdc/90 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
         >
           <Plus className="w-5 h-5" />
           <span>Nouvel Utilisateur</span>

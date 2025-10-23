@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Download, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useDataNumeric, useAnnees, useProvinces } from "@/hooks/useApi";
 
 const ITEMS_PER_PAGE = 50;
@@ -12,6 +12,8 @@ export default function UserDataNumericProvincialTab() {
   const [provinceFilter, setProvinceFilter] = useState("all");
   const [sexeFilter, setSexeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedData, setSelectedData] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Fetch data with province (provincial data)
   const { data: allData, loading } = useDataNumeric();
@@ -213,11 +215,15 @@ export default function UserDataNumericProvincialTab() {
               {paginatedData.map((item, idx) => (
                 <tr
                   key={item._id}
-                  className={
+                  onClick={() => {
+                    setSelectedData(item);
+                    setShowDetailModal(true);
+                  }}
+                  className={`cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${
                     idx % 2 === 0
                       ? "bg-white dark:bg-slate-800"
                       : "bg-gray-50 dark:bg-slate-700/50"
-                  }
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     {item.annee}
@@ -287,6 +293,169 @@ export default function UserDataNumericProvincialTab() {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Détails de la donnée provinciale
+              </h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Main info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Année
+                  </label>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {selectedData.annee}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Province
+                  </label>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {selectedData.province?.nom}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Indicateur
+                </label>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {selectedData.indicateur?.nom}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedData.indicateur?.code}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Sexe
+                </label>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {selectedData.sexe || "Total"}
+                </p>
+              </div>
+
+              {selectedData.cible && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Cible
+                  </label>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {selectedData.cible.nom}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Valeur
+                  </label>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {selectedData.valeur?.toLocaleString()}
+                  </p>
+                </div>
+                {selectedData.pourcentage && (
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Pourcentage
+                    </label>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {selectedData.pourcentage}%
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              {selectedData.note && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <label className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2 block">
+                    📝 Notes
+                  </label>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {selectedData.note}
+                  </p>
+                </div>
+              )}
+
+              {/* Sources as clickable URLs */}
+              {selectedData.source && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <label className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 block">
+                    🔗 Sources
+                  </label>
+                  <div className="space-y-2">
+                    {selectedData.source
+                      .split(",")
+                      .map((source: string, idx: number) => {
+                        const trimmedSource = source.trim();
+                        const isUrl =
+                          trimmedSource.startsWith("http://") ||
+                          trimmedSource.startsWith("https://");
+
+                        return (
+                          <div key={idx}>
+                            {isUrl ? (
+                              <a
+                                href={trimmedSource}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2"
+                              >
+                                <span>🔗</span>
+                                <span>{trimmedSource}</span>
+                              </a>
+                            ) : (
+                              <p className="text-gray-700 dark:text-gray-300">
+                                {trimmedSource}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Metadata */}
+              <div className="border-t border-gray-200 dark:border-slate-700 pt-4 text-sm text-gray-500 dark:text-gray-400">
+                <p>
+                  Créé le:{" "}
+                  {new Date(selectedData.dateCreation).toLocaleDateString(
+                    "fr-FR"
+                  )}
+                </p>
+                {selectedData.dateModification && (
+                  <p>
+                    Modifié le:{" "}
+                    {new Date(selectedData.dateModification).toLocaleDateString(
+                      "fr-FR"
+                    )}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

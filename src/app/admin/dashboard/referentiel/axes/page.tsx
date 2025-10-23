@@ -176,9 +176,9 @@ export default function AxesPage() {
           </button>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-bleu-rdc text-white rounded-lg hover:bg-bleu-rdc-700"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-bleu-rdc to-blue-600 hover:from-bleu-rdc/90 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             Nouveau Axe
           </button>
         </div>

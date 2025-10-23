@@ -7,6 +7,7 @@ import { useLoisMesuresActions } from "@/hooks/useLoisMesuresActions";
 
 export default function DataQualitativeTab() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [lmmaSearchTerm, setLmmaSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -19,10 +20,16 @@ export default function DataQualitativeTab() {
   const [currentIndicatorId, setCurrentIndicatorId] = useState<string>("");
   const [selectedLMMAs, setSelectedLMMAs] = useState<string[]>([]);
 
-  const { data: qualitativeData, loading } = useDataQualitative();
+  const { data: qualitativeData, loading, error } = useDataQualitative();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
   const { loisMesuresActions } = useLoisMesuresActions();
+
+  // Debug logging
+  console.log("DataQualitativeTab - Loading:", loading);
+  console.log("DataQualitativeTab - Error:", error);
+  console.log("DataQualitativeTab - Data:", qualitativeData);
+  console.log("DataQualitativeTab - LMMA:", loisMesuresActions);
 
   // Filter data
   const filteredData = (qualitativeData || []).filter(
@@ -223,7 +230,7 @@ export default function DataQualitativeTab() {
             setEditingData(null);
             setIsModalOpen(true);
           }}
-          className="flex items-center space-x-2 px-4 py-2 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors"
+          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-bleu-rdc to-blue-600 hover:from-bleu-rdc/90 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
         >
           <Plus className="w-5 h-5" />
           <span>Nouvel Indicateur Qualitatif</span>
@@ -513,7 +520,7 @@ export default function DataQualitativeTab() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-bleu-rdc to-blue-600 hover:from-bleu-rdc/90 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                 >
                   {editingData ? "Mettre à jour" : "Créer"}
                 </button>
@@ -559,6 +566,19 @@ export default function DataQualitativeTab() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Lois, Mesures & Actions disponibles *
                 </label>
+
+                {/* Search field for LMMA */}
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher une loi, mesure ou action..."
+                    value={lmmaSearchTerm}
+                    onChange={(e) => setLmmaSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  />
+                </div>
+
                 <div className="border border-gray-300 dark:border-slate-600 rounded-lg max-h-96 overflow-y-auto">
                   {!loisMesuresActions || loisMesuresActions.length === 0 ? (
                     <div className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -566,68 +586,89 @@ export default function DataQualitativeTab() {
                       en créer dans la section Référentiel.
                     </div>
                   ) : (
-                    loisMesuresActions.map(
-                      (lmma: {
-                        _id: string;
-                        nom: string;
-                        type: { nom: string };
-                        annee?: number;
-                        reference?: string;
-                        statut?: string;
-                      }) => (
-                        <label
-                          key={lmma._id}
-                          className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-gray-200 dark:border-slate-700 last:border-b-0"
-                        >
-                          <input
-                            type="checkbox"
-                            name="loisMesuresActions"
-                            value={lmma._id}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedLMMAs((prev) => [...prev, lmma._id]);
-                              } else {
-                                setSelectedLMMAs((prev) =>
-                                  prev.filter((id) => id !== lmma._id)
-                                );
-                              }
-                            }}
-                            className="mt-1 w-5 h-5 text-bleu-rdc focus:ring-bleu-rdc border-gray-300 rounded"
-                          />
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900 dark:text-white">
-                              {lmma.nom}
-                            </p>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                {lmma.type.nom}
-                              </span>
-                              {lmma.annee && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                  {lmma.annee}
+                    loisMesuresActions
+                      .filter(
+                        (lmma: {
+                          nom: string;
+                          type: { nom: string };
+                          reference?: string;
+                        }) =>
+                          !lmmaSearchTerm ||
+                          lmma.nom
+                            ?.toLowerCase()
+                            .includes(lmmaSearchTerm.toLowerCase()) ||
+                          lmma.type?.nom
+                            ?.toLowerCase()
+                            .includes(lmmaSearchTerm.toLowerCase()) ||
+                          lmma.reference
+                            ?.toLowerCase()
+                            .includes(lmmaSearchTerm.toLowerCase())
+                      )
+                      .map(
+                        (lmma: {
+                          _id: string;
+                          nom: string;
+                          type: { nom: string };
+                          annee?: number;
+                          reference?: string;
+                          statut?: string;
+                        }) => (
+                          <label
+                            key={lmma._id}
+                            className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-gray-200 dark:border-slate-700 last:border-b-0"
+                          >
+                            <input
+                              type="checkbox"
+                              name="loisMesuresActions"
+                              value={lmma._id}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedLMMAs((prev) => [
+                                    ...prev,
+                                    lmma._id,
+                                  ]);
+                                } else {
+                                  setSelectedLMMAs((prev) =>
+                                    prev.filter((id) => id !== lmma._id)
+                                  );
+                                }
+                              }}
+                              className="mt-1 w-5 h-5 text-bleu-rdc focus:ring-bleu-rdc border-gray-300 rounded"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {lmma.nom}
+                              </p>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                  {lmma.type.nom}
                                 </span>
-                              )}
-                              {lmma.statut && (
-                                <span
-                                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                    lmma.statut === "en vigueur"
-                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                                  }`}
-                                >
-                                  {lmma.statut}
-                                </span>
+                                {lmma.annee && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                    {lmma.annee}
+                                  </span>
+                                )}
+                                {lmma.statut && (
+                                  <span
+                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                      lmma.statut === "en vigueur"
+                                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                    }`}
+                                  >
+                                    {lmma.statut}
+                                  </span>
+                                )}
+                              </div>
+                              {lmma.reference && (
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                  Réf: {lmma.reference}
+                                </p>
                               )}
                             </div>
-                            {lmma.reference && (
-                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                Réf: {lmma.reference}
-                              </p>
-                            )}
-                          </div>
-                        </label>
+                          </label>
+                        )
                       )
-                    )
                   )}
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">

@@ -173,7 +173,7 @@ export default function LoisMesuresActionsPage() {
             });
             setShowModal(true);
           }}
-          className="flex items-center gap-2 px-6 py-3 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors shadow-md"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-bleu-rdc to-blue-600 hover:from-bleu-rdc/90 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
         >
           <Plus className="w-5 h-5" />
           Nouvelle LMMA
