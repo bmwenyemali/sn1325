@@ -430,7 +430,7 @@ export default function DataQualitativeTab() {
                   Lois, Mesures & Actions ({item.items.length})
                 </h4>
                 <div className="space-y-2">
-                  {item.items.slice(0, 3).map(
+                  {item.items.map(
                     (
                       lmma: {
                         loisMesuresActions:
@@ -445,52 +445,58 @@ export default function DataQualitativeTab() {
                         _id?: string;
                       },
                       idx: number
-                    ) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {typeof lmma.loisMesuresActions === "object"
-                              ? lmma.loisMesuresActions.nom ||
-                                lmma.loisMesuresActions.titre ||
-                                "N/A"
-                              : "N/A"}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {typeof lmma.loisMesuresActions === "object" &&
-                            typeof lmma.loisMesuresActions.type === "object"
-                              ? lmma.loisMesuresActions.type.nom
-                              : typeof lmma.loisMesuresActions === "object" &&
-                                typeof lmma.loisMesuresActions.type === "string"
-                              ? lmma.loisMesuresActions.type
-                              : "N/A"}{" "}
-                            - {lmma.annee}
-                          </p>
+                    ) => {
+                      // Only show first 3 items in the preview
+                      if (idx >= 3) return null;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {typeof lmma.loisMesuresActions === "object"
+                                ? lmma.loisMesuresActions.nom ||
+                                  lmma.loisMesuresActions.titre ||
+                                  "N/A"
+                                : "N/A"}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {typeof lmma.loisMesuresActions === "object" &&
+                              typeof lmma.loisMesuresActions.type === "object"
+                                ? lmma.loisMesuresActions.type.nom
+                                : typeof lmma.loisMesuresActions === "object" &&
+                                  typeof lmma.loisMesuresActions.type ===
+                                    "string"
+                                ? lmma.loisMesuresActions.type
+                                : "N/A"}{" "}
+                              - {lmma.annee}
+                            </p>
+                          </div>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() =>
+                                openEditItemModal(item._id, lmma, idx)
+                              }
+                              className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                              title="Modifier"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDeleteItem(item._id, lmma._id, idx)
+                              }
+                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() =>
-                              openEditItemModal(item._id, lmma, idx)
-                            }
-                            className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                            title="Modifier"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDeleteItem(item._id, lmma._id, idx)
-                            }
-                            className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
-                    )
+                      );
+                    }
                   )}
                   {item.items.length > 3 && (
                     <button

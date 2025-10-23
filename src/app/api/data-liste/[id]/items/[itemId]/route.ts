@@ -22,6 +22,8 @@ export async function PATCH(
     const { id, itemId } = await params;
     const body = await request.json();
 
+    console.log("PATCH item - id:", id, "itemId:", itemId);
+
     // Update item in DataQualitative
     const dataQualitative = await DataQualitative.findById(id);
 
@@ -32,27 +34,43 @@ export async function PATCH(
       );
     }
 
+    console.log(
+      "Items:",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      dataQualitative.items.map((item: any, idx: number) => ({
+        index: idx,
+        _id: item._id?.toString(),
+      }))
+    );
+
     let itemIndex = -1;
 
     // Check if itemId is an index-based identifier (for old items without _id)
     if (itemId.startsWith("index-")) {
       itemIndex = parseInt(itemId.replace("index-", ""));
+      console.log("Using index-based update, index:", itemIndex);
       if (itemIndex < 0 || itemIndex >= dataQualitative.items.length) {
         return NextResponse.json(
-          { success: false, error: "Item non trouvé" },
+          { success: false, error: "Item non trouvé (index invalide)" },
           { status: 404 }
         );
       }
     } else {
       // Use _id for new items
+      console.log("Using _id-based update");
       itemIndex = dataQualitative.items.findIndex(
-        (item: { _id?: { toString: () => string } }) =>
-          item._id && item._id.toString() === itemId
+        (item: { _id?: { toString: () => string } }) => {
+          const itemIdStr = item._id?.toString();
+          console.log("Comparing:", itemIdStr, "with", itemId);
+          return item._id && itemIdStr === itemId;
+        }
       );
+
+      console.log("Found at index:", itemIndex);
 
       if (itemIndex === -1) {
         return NextResponse.json(
-          { success: false, error: "Item non trouvé" },
+          { success: false, error: "Item non trouvé (_id not matched)" },
           { status: 404 }
         );
       }
@@ -104,6 +122,8 @@ export async function DELETE(
     await connectDB();
     const { id, itemId } = await params;
 
+    console.log("DELETE item - id:", id, "itemId:", itemId);
+
     const dataQualitative = await DataQualitative.findById(id);
 
     if (!dataQualitative) {
@@ -113,28 +133,46 @@ export async function DELETE(
       );
     }
 
+    console.log("Items before delete:", dataQualitative.items.length);
+    console.log(
+      "Items ids:",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      dataQualitative.items.map((item: any) => ({
+        _id: item._id?.toString(),
+        lmma: item.loisMesuresActions?.toString(),
+      }))
+    );
+
     // Check if itemId is an index-based identifier (for old items without _id)
     if (itemId.startsWith("index-")) {
       const index = parseInt(itemId.replace("index-", ""));
+      console.log("Using index-based delete, index:", index);
       if (index >= 0 && index < dataQualitative.items.length) {
         dataQualitative.items.splice(index, 1);
       } else {
+        console.log("Index out of bounds");
         return NextResponse.json(
-          { success: false, error: "Item non trouvé" },
+          { success: false, error: "Item non trouvé (index invalide)" },
           { status: 404 }
         );
       }
     } else {
       // Use _id for new items
+      console.log("Using _id-based delete");
       const initialLength = dataQualitative.items.length;
       dataQualitative.items = dataQualitative.items.filter(
-        (item: { _id?: { toString: () => string } }) =>
-          item._id && item._id.toString() !== itemId
+        (item: { _id?: { toString: () => string } }) => {
+          const itemIdStr = item._id?.toString();
+          console.log("Comparing:", itemIdStr, "with", itemId);
+          return itemIdStr !== itemId;
+        }
       );
+
+      console.log("Items after filter:", dataQualitative.items.length);
 
       if (dataQualitative.items.length === initialLength) {
         return NextResponse.json(
-          { success: false, error: "Item non trouvé" },
+          { success: false, error: "Item non trouvé (_id not matched)" },
           { status: 404 }
         );
       }
