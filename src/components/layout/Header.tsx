@@ -173,19 +173,13 @@ export function Header() {
 
             <ThemeToggle />
 
-            {/* Login/Logout buttons */}
+            {/* Login/Profile */}
             {!session ? (
               <Link href="/auth/signin" className="btn-primary">
                 Se connecter
               </Link>
             ) : (
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center space-x-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Se déconnecter</span>
-              </button>
+              <ProfileMenu />
             )}
           </nav>
 
@@ -358,5 +352,58 @@ export function Header() {
         )}
       </div>
     </header>
+  );
+}
+
+function ProfileMenu() {
+  const { data: session } = useSession();
+  const [open, setOpen] = useState(false);
+
+  const user = session?.user as {
+    name?: string;
+    email?: string;
+  } | null;
+
+  const initials = (user?.name || user?.email || "U")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <div className="w-8 h-8 rounded-full bg-bleu-rdc text-white flex items-center justify-center font-bold">
+          {initials}
+        </div>
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 z-50">
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              {user?.name || "Utilisateur"}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+              {user?.email}
+            </p>
+          </div>
+          <div className="p-2">
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Se déconnecter</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

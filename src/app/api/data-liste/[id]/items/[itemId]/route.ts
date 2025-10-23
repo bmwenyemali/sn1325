@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../../../../../../auth";
 import connectDB from "@/lib/db";
 import DataQualitative from "@/models/DataQualitative";
-import LoisMesuresActions from "@/models/LoisMesuresActions";
 
 // PATCH /api/data-liste/[id]/items/[itemId] - Update item in qualitative data
 export async function PATCH(
@@ -22,20 +21,6 @@ export async function PATCH(
     await connectDB();
     const { id, itemId } = await params;
     const body = await request.json();
-
-    // Find or update the LMA reference
-    let lma = await LoisMesuresActions.findOne({
-      titre: body.lmaTitre,
-      type: body.lmaType,
-    });
-
-    if (!lma) {
-      lma = await LoisMesuresActions.create({
-        titre: body.lmaTitre,
-        type: body.lmaType,
-        ordre: body.ordre || 0,
-      });
-    }
 
     // Update item in DataQualitative
     const dataQualitative = await DataQualitative.findById(id);
@@ -59,10 +44,12 @@ export async function PATCH(
       );
     }
 
+    // Update the item with new values
     dataQualitative.items[itemIndex] = {
       ...dataQualitative.items[itemIndex],
-      loisMesuresActions: lma._id,
+      loisMesuresActions: body.loisMesuresActions,
       annee: body.annee,
+      ordre: body.ordre,
       notes: body.notes || "",
     };
 

@@ -20,7 +20,13 @@ export default function DataQualitativeTab() {
   const [currentIndicatorId, setCurrentIndicatorId] = useState<string>("");
   const [selectedLMMAs, setSelectedLMMAs] = useState<string[]>([]);
 
-  const { data: qualitativeData, loading, error } = useDataQualitative();
+  const {
+    data: qualitativeData,
+    loading,
+    error,
+    refresh,
+    invalidate,
+  } = useDataQualitative();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
   const { loisMesuresActions } = useLoisMesuresActions();
@@ -69,7 +75,9 @@ export default function DataQualitativeTab() {
             ? "Indicateur modifié avec succès !"
             : "Indicateur créé avec succès ! Vous pouvez maintenant ajouter des items LMMA en cliquant sur le bouton vert '+'."
         );
-        window.location.reload();
+        // Sync without reloading page
+        invalidate?.();
+        await refresh?.();
       } else {
         const errorData = await res.json();
         alert(
@@ -90,7 +98,58 @@ export default function DataQualitativeTab() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    // Get selected LMMA IDs from checkboxes
+    const annee = parseInt(formData.get("annee") as string);
+    const ordre = formData.get("ordre")
+      ? parseInt(formData.get("ordre") as string)
+      : undefined;
+    const notes = (formData.get("notes") as string) || "";
+
+    // If editing an existing item
+    if (editingItem && editingItem._id) {
+      const lmmaId = formData.get("loisMesuresActions") as string;
+
+      if (!lmmaId) {
+        alert("Veuillez sélectionner une Loi/Mesure/Action");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/data-liste/${currentIndicatorId}/items/${editingItem._id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              loisMesuresActions: lmmaId,
+              annee: annee,
+              ordre: ordre,
+              notes: notes,
+            }),
+          }
+        );
+
+        if (res.ok) {
+          alert("Item LMMA modifié avec succès !");
+          setIsItemModalOpen(false);
+          setEditingItem(null);
+          setCurrentIndicatorId("");
+          setSelectedLMMAs([]);
+
+          // Sync list without reloading
+          invalidate?.();
+          await refresh?.();
+        } else {
+          const errorData = await res.json();
+          alert(`Erreur: ${errorData.error || "Une erreur est survenue"}`);
+        }
+      } catch (error) {
+        console.error("Error updating item:", error);
+        alert("Erreur de connexion lors de la mise à jour.");
+      }
+      return;
+    }
+
+    // Adding new items
     const selectedLMMAIds = Array.from(
       formData.getAll("loisMesuresActions")
     ) as string[];
@@ -99,12 +158,6 @@ export default function DataQualitativeTab() {
       alert("Veuillez sélectionner au moins une Loi/Mesure/Action");
       return;
     }
-
-    const annee = parseInt(formData.get("annee") as string);
-    const ordre = formData.get("ordre")
-      ? parseInt(formData.get("ordre") as string)
-      : undefined;
-    const notes = (formData.get("notes") as string) || "";
 
     // Create multiple items, one for each selected LMMA
     const items = selectedLMMAIds.map((lmmaId, index) => ({
@@ -115,31 +168,38 @@ export default function DataQualitativeTab() {
     }));
 
     try {
-      // Add all selected LMMA as separate items
-      for (const itemData of items) {
-        const res = await fetch(`/api/data-liste/${currentIndicatorId}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(itemData),
-        });
+      // Add all selected LMMA as separate items in parallel for speed
+      const responses = await Promise.all(
+        items.map((itemData) =>
+          fetch(`/api/data-liste/${currentIndicatorId}/items`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(itemData),
+          })
+        )
+      );
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          alert(
-            `Erreur lors de l'ajout d'un item: ${
-              errorData.error || "Une erreur est survenue"
-            }`
-          );
-          return;
-        }
+      const failed = [] as number[];
+      for (let i = 0; i < responses.length; i++) {
+        if (!responses[i].ok) failed.push(i);
+      }
+
+      if (failed.length > 0) {
+        alert(
+          `Certains items n'ont pas pu être ajoutés (${failed.length}/${items.length}). Réessayez pour ces éléments.`
+        );
+      } else {
+        alert(`${selectedLMMAIds.length} item(s) LMMA ajouté(s) avec succès !`);
       }
 
       setIsItemModalOpen(false);
       setEditingItem(null);
       setCurrentIndicatorId("");
       setSelectedLMMAs([]);
-      alert(`${selectedLMMAIds.length} item(s) LMMA ajouté(s) avec succès !`);
-      window.location.reload();
+
+      // Sync list without reloading
+      invalidate?.();
+      await refresh?.();
     } catch (error) {
       console.error("Error saving items:", error);
       alert(
@@ -162,7 +222,8 @@ export default function DataQualitativeTab() {
       });
 
       if (res.ok) {
-        window.location.reload();
+        invalidate?.();
+        await refresh?.();
       }
     } catch (error) {
       console.error("Error deleting data:", error);
@@ -173,6 +234,11 @@ export default function DataQualitativeTab() {
   const handleDeleteItem = async (indicatorId: string, itemId: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet item ?")) return;
 
+    if (!itemId) {
+      alert("ID de l'item manquant");
+      return;
+    }
+
     try {
       const res = await fetch(
         `/api/data-liste/${indicatorId}/items/${itemId}`,
@@ -182,7 +248,12 @@ export default function DataQualitativeTab() {
       );
 
       if (res.ok) {
-        window.location.reload();
+        alert("Item LMMA supprimé avec succès !");
+        invalidate?.();
+        await refresh?.();
+      } else {
+        const errorData = await res.json();
+        alert(`Erreur: ${errorData.error || "Impossible de supprimer l'item"}`);
       }
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -536,7 +607,9 @@ export default function DataQualitativeTab() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Sélectionner des Lois/Mesures/Actions
+                {editingItem
+                  ? "Modifier l'item LMMA"
+                  : "Sélectionner des Lois/Mesures/Actions"}
               </h2>
               <button
                 onClick={() => {
@@ -552,128 +625,160 @@ export default function DataQualitativeTab() {
             </div>
 
             <form onSubmit={handleItemSubmit} className="p-6 space-y-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>Instructions:</strong> Sélectionnez une ou plusieurs
-                  Lois/Mesures/Actions existantes de la collection à associer à
-                  cet indicateur. Vous pouvez sélectionner plusieurs items en
-                  cochant les cases.
-                </p>
-              </div>
+              {!editingItem && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>Instructions:</strong> Sélectionnez une ou plusieurs
+                    Lois/Mesures/Actions existantes de la collection à associer
+                    à cet indicateur. Vous pouvez sélectionner plusieurs items
+                    en cochant les cases.
+                  </p>
+                </div>
+              )}
 
-              {/* LMMA Selection List */}
+              {/* LMMA Selection - Different UI for edit vs add */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Lois, Mesures & Actions disponibles *
+                  Lois, Mesures & Actions {editingItem ? "*" : "disponibles *"}
                 </label>
 
-                {/* Search field for LMMA */}
-                <div className="relative mb-3">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher une loi, mesure ou action..."
-                    value={lmmaSearchTerm}
-                    onChange={(e) => setLmmaSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc focus:border-transparent dark:bg-slate-700 dark:text-white"
-                  />
-                </div>
-
-                <div className="border border-gray-300 dark:border-slate-600 rounded-lg max-h-96 overflow-y-auto">
-                  {!loisMesuresActions || loisMesuresActions.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                      Aucune loi/mesure/action disponible. Veuillez d&apos;abord
-                      en créer dans la section Référentiel.
+                {editingItem ? (
+                  // Single select dropdown when editing
+                  <select
+                    name="loisMesuresActions"
+                    required
+                    defaultValue={
+                      typeof editingItem.loisMesuresActions === "object"
+                        ? editingItem.loisMesuresActions._id
+                        : editingItem.loisMesuresActions
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Sélectionner une LMMA</option>
+                    {loisMesuresActions?.map(
+                      (lmma: {
+                        _id: string;
+                        nom: string;
+                        type: { nom: string };
+                      }) => (
+                        <option key={lmma._id} value={lmma._id}>
+                          {lmma.nom} ({lmma.type.nom})
+                        </option>
+                      )
+                    )}
+                  </select>
+                ) : (
+                  <>
+                    {/* Search field for LMMA */}
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Rechercher une loi, mesure ou action..."
+                        value={lmmaSearchTerm}
+                        onChange={(e) => setLmmaSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-bleu-rdc focus:border-transparent dark:bg-slate-700 dark:text-white"
+                      />
                     </div>
-                  ) : (
-                    loisMesuresActions
-                      .filter(
-                        (lmma: {
-                          nom: string;
-                          type: { nom: string };
-                          reference?: string;
-                        }) =>
-                          !lmmaSearchTerm ||
-                          lmma.nom
-                            ?.toLowerCase()
-                            .includes(lmmaSearchTerm.toLowerCase()) ||
-                          lmma.type?.nom
-                            ?.toLowerCase()
-                            .includes(lmmaSearchTerm.toLowerCase()) ||
-                          lmma.reference
-                            ?.toLowerCase()
-                            .includes(lmmaSearchTerm.toLowerCase())
-                      )
-                      .map(
-                        (lmma: {
-                          _id: string;
-                          nom: string;
-                          type: { nom: string };
-                          annee?: number;
-                          reference?: string;
-                          statut?: string;
-                        }) => (
-                          <label
-                            key={lmma._id}
-                            className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-gray-200 dark:border-slate-700 last:border-b-0"
-                          >
-                            <input
-                              type="checkbox"
-                              name="loisMesuresActions"
-                              value={lmma._id}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedLMMAs((prev) => [
-                                    ...prev,
-                                    lmma._id,
-                                  ]);
-                                } else {
-                                  setSelectedLMMAs((prev) =>
-                                    prev.filter((id) => id !== lmma._id)
-                                  );
-                                }
-                              }}
-                              className="mt-1 w-5 h-5 text-bleu-rdc focus:ring-bleu-rdc border-gray-300 rounded"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {lmma.nom}
-                              </p>
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                  {lmma.type.nom}
-                                </span>
-                                {lmma.annee && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                    {lmma.annee}
-                                  </span>
-                                )}
-                                {lmma.statut && (
-                                  <span
-                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                      lmma.statut === "en vigueur"
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                                    }`}
-                                  >
-                                    {lmma.statut}
-                                  </span>
-                                )}
-                              </div>
-                              {lmma.reference && (
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                  Réf: {lmma.reference}
-                                </p>
-                              )}
-                            </div>
-                          </label>
-                        )
-                      )
-                  )}
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  {selectedLMMAs.length} item(s) sélectionné(s)
-                </p>
+
+                    <div className="border border-gray-300 dark:border-slate-600 rounded-lg max-h-96 overflow-y-auto">
+                      {!loisMesuresActions ||
+                      loisMesuresActions.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                          Aucune loi/mesure/action disponible. Veuillez
+                          d&apos;abord en créer dans la section Référentiel.
+                        </div>
+                      ) : (
+                        loisMesuresActions
+                          .filter(
+                            (lmma: {
+                              nom: string;
+                              type: { nom: string };
+                              reference?: string;
+                            }) =>
+                              !lmmaSearchTerm ||
+                              lmma.nom
+                                ?.toLowerCase()
+                                .includes(lmmaSearchTerm.toLowerCase()) ||
+                              lmma.type?.nom
+                                ?.toLowerCase()
+                                .includes(lmmaSearchTerm.toLowerCase()) ||
+                              lmma.reference
+                                ?.toLowerCase()
+                                .includes(lmmaSearchTerm.toLowerCase())
+                          )
+                          .map(
+                            (lmma: {
+                              _id: string;
+                              nom: string;
+                              type: { nom: string };
+                              annee?: number;
+                              reference?: string;
+                              statut?: string;
+                            }) => (
+                              <label
+                                key={lmma._id}
+                                className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-gray-200 dark:border-slate-700 last:border-b-0"
+                              >
+                                <input
+                                  type="checkbox"
+                                  name="loisMesuresActions"
+                                  value={lmma._id}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedLMMAs((prev) => [
+                                        ...prev,
+                                        lmma._id,
+                                      ]);
+                                    } else {
+                                      setSelectedLMMAs((prev) =>
+                                        prev.filter((id) => id !== lmma._id)
+                                      );
+                                    }
+                                  }}
+                                  className="mt-1 w-5 h-5 text-bleu-rdc focus:ring-bleu-rdc border-gray-300 rounded"
+                                />
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900 dark:text-white">
+                                    {lmma.nom}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                      {lmma.type.nom}
+                                    </span>
+                                    {lmma.annee && (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                        {lmma.annee}
+                                      </span>
+                                    )}
+                                    {lmma.statut && (
+                                      <span
+                                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                          lmma.statut === "en vigueur"
+                                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                        }`}
+                                      >
+                                        {lmma.statut}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {lmma.reference && (
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                      Réf: {lmma.reference}
+                                    </p>
+                                  )}
+                                </div>
+                              </label>
+                            )
+                          )
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      {selectedLMMAs.length} item(s) sélectionné(s)
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Common fields for all selected items */}
@@ -699,24 +804,28 @@ export default function DataQualitativeTab() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ordre de départ
+                    {editingItem ? "Ordre" : "Ordre de départ"}
                   </label>
                   <input
                     type="number"
                     name="ordre"
-                    defaultValue={1}
+                    defaultValue={editingItem?.ordre || 1}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     placeholder="Ex: 1, 2, 3..."
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Les items suivants seront incrémentés automatiquement
-                  </p>
+                  {!editingItem && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Les items suivants seront incrémentés automatiquement
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Notes (communes à tous les items sélectionnés)
+                  {editingItem
+                    ? "Notes"
+                    : "Notes (communes à tous les items sélectionnés)"}
                 </label>
                 <textarea
                   name="notes"
@@ -742,10 +851,12 @@ export default function DataQualitativeTab() {
                 </button>
                 <button
                   type="submit"
-                  disabled={selectedLMMAs.length === 0}
+                  disabled={!editingItem && selectedLMMAs.length === 0}
                   className="px-6 py-2 bg-bleu-rdc hover:bg-bleu-rdc/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Ajouter ({selectedLMMAs.length})
+                  {editingItem
+                    ? "Mettre à jour"
+                    : `Ajouter (${selectedLMMAs.length})`}
                 </button>
               </div>
             </form>

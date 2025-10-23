@@ -20,7 +20,7 @@ export default function DataNumericProvincialTab() {
   const [editingData, setEditingData] = useState<any>(null);
 
   // Fetch data with province (provincial data)
-  const { data: allData, loading } = useDataNumeric();
+  const { data: allData, loading, refresh, invalidate } = useDataNumeric();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
   const { data: provinces } = useProvinces();
@@ -52,7 +52,8 @@ export default function DataNumericProvincialTab() {
       });
 
       if (res.ok) {
-        window.location.reload();
+        invalidate?.();
+        await refresh?.();
       }
     } catch (error) {
       console.error("Error deleting data:", error);
@@ -93,7 +94,8 @@ export default function DataNumericProvincialTab() {
       if (res.ok) {
         setIsModalOpen(false);
         setEditingData(null);
-        window.location.reload();
+        invalidate?.();
+        await refresh?.();
       }
     } catch (error) {
       console.error("Error saving data:", error);

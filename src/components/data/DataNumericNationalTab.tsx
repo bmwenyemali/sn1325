@@ -18,7 +18,7 @@ export default function DataNumericNationalTab() {
   const [editingData, setEditingData] = useState<any>(null);
 
   // Fetch data without province (national data)
-  const { data: allData, loading } = useDataNumeric();
+  const { data: allData, loading, refresh, invalidate } = useDataNumeric();
   const { data: indicateurs } = useIndicateurs();
   const { data: annees } = useAnnees();
   const { data: cibles } = useCibles();
@@ -47,7 +47,9 @@ export default function DataNumericNationalTab() {
       });
 
       if (res.ok) {
-        window.location.reload();
+        // Bust cache and refresh list without reloading the page
+        invalidate?.();
+        await refresh?.();
       }
     } catch (error) {
       console.error("Error deleting data:", error);
@@ -87,7 +89,9 @@ export default function DataNumericNationalTab() {
       if (res.ok) {
         setIsModalOpen(false);
         setEditingData(null);
-        window.location.reload();
+        // refresh list without page reload
+        invalidate?.();
+        await refresh?.();
       }
     } catch (error) {
       console.error("Error saving data:", error);

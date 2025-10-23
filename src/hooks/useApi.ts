@@ -3,8 +3,8 @@
  * Reduces code duplication and improves performance with caching
  */
 
-import { useState, useEffect } from "react";
-import { fetchCached } from "@/lib/apiCache";
+import { useState, useEffect, useCallback } from "react";
+import { fetchCached, apiCache, fetchAPI } from "@/lib/apiCache";
 
 interface UseApiOptions {
   enabled?: boolean;
@@ -19,6 +19,34 @@ export function useApi<T>(url: string | null, options: UseApiOptions = {}) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  // Build a cache key similar to fetchCached
+  const cacheKey = `${url || ""}-${JSON.stringify("")}`;
+
+  const refresh = useCallback(async () => {
+    if (!url) return;
+    try {
+      setLoading(true);
+      setError(null);
+      // Fetch fresh data bypassing cache
+      const result = await fetchAPI<T>(url);
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Unknown error"));
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  const invalidate = useCallback(() => {
+    if (!url) return;
+    try {
+      // Invalidate exact key and any pattern starting with url
+      apiCache.invalidate(cacheKey);
+      apiCache.invalidatePattern(`^${url}`);
+    } catch {
+      // ignore
+    }
+  }, [cacheKey, url]);
 
   useEffect(() => {
     if (!enabled || !url) {
@@ -55,7 +83,7 @@ export function useApi<T>(url: string | null, options: UseApiOptions = {}) {
     };
   }, [url, enabled, ttl]);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh, invalidate, setData };
 }
 
 /**

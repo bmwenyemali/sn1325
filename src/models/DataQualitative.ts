@@ -41,7 +41,7 @@ const DataQualitativeItemSchema: Schema = new Schema(
       trim: true,
     },
   },
-  { _id: false }
+  { _id: true } // Enable _id for subdocuments so we can update/delete individual items
 );
 
 const DataQualitativeSchema: Schema = new Schema(
