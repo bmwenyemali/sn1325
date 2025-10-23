@@ -11,6 +11,7 @@ export default function UserDataNumericNationalTab() {
   const [yearFilter, setYearFilter] = useState("all");
   const [sexeFilter, setSexeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedData, setSelectedData] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -352,13 +353,13 @@ export default function UserDataNumericNationalTab() {
               </div>
 
               {/* Notes */}
-              {selectedData.note && (
+              {selectedData.notes && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                   <label className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2 block">
                     📝 Notes
                   </label>
                   <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {selectedData.note}
+                    {selectedData.notes}
                   </p>
                 </div>
               )}
