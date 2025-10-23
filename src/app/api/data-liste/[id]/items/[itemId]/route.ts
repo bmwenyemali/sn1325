@@ -32,16 +32,30 @@ export async function PATCH(
       );
     }
 
-    const itemIndex = dataQualitative.items.findIndex(
-      (item: { _id: { toString: () => string } }) =>
-        item._id.toString() === itemId
-    );
+    let itemIndex = -1;
 
-    if (itemIndex === -1) {
-      return NextResponse.json(
-        { success: false, error: "Item non trouvé" },
-        { status: 404 }
+    // Check if itemId is an index-based identifier (for old items without _id)
+    if (itemId.startsWith("index-")) {
+      itemIndex = parseInt(itemId.replace("index-", ""));
+      if (itemIndex < 0 || itemIndex >= dataQualitative.items.length) {
+        return NextResponse.json(
+          { success: false, error: "Item non trouvé" },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Use _id for new items
+      itemIndex = dataQualitative.items.findIndex(
+        (item: { _id?: { toString: () => string } }) =>
+          item._id && item._id.toString() === itemId
       );
+
+      if (itemIndex === -1) {
+        return NextResponse.json(
+          { success: false, error: "Item non trouvé" },
+          { status: 404 }
+        );
+      }
     }
 
     // Update the item with new values
@@ -99,10 +113,32 @@ export async function DELETE(
       );
     }
 
-    dataQualitative.items = dataQualitative.items.filter(
-      (item: { _id: { toString: () => string } }) =>
-        item._id.toString() !== itemId
-    );
+    // Check if itemId is an index-based identifier (for old items without _id)
+    if (itemId.startsWith("index-")) {
+      const index = parseInt(itemId.replace("index-", ""));
+      if (index >= 0 && index < dataQualitative.items.length) {
+        dataQualitative.items.splice(index, 1);
+      } else {
+        return NextResponse.json(
+          { success: false, error: "Item non trouvé" },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Use _id for new items
+      const initialLength = dataQualitative.items.length;
+      dataQualitative.items = dataQualitative.items.filter(
+        (item: { _id?: { toString: () => string } }) =>
+          item._id && item._id.toString() !== itemId
+      );
+
+      if (dataQualitative.items.length === initialLength) {
+        return NextResponse.json(
+          { success: false, error: "Item non trouvé" },
+          { status: 404 }
+        );
+      }
+    }
 
     await dataQualitative.save();
 

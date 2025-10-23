@@ -17,6 +17,7 @@ export default function DataQualitativeTab() {
   const [selectedData, setSelectedData] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItemIndex, setEditingItemIndex] = useState<number>(-1);
   const [currentIndicatorId, setCurrentIndicatorId] = useState<string>("");
   const [selectedLMMAs, setSelectedLMMAs] = useState<string[]>([]);
 
@@ -105,7 +106,7 @@ export default function DataQualitativeTab() {
     const notes = (formData.get("notes") as string) || "";
 
     // If editing an existing item
-    if (editingItem && editingItem._id) {
+    if (editingItem) {
       const lmmaId = formData.get("loisMesuresActions") as string;
 
       if (!lmmaId) {
@@ -114,8 +115,10 @@ export default function DataQualitativeTab() {
       }
 
       try {
+        // Use _id if available, otherwise use index
+        const identifier = editingItem._id || `index-${editingItemIndex}`;
         const res = await fetch(
-          `/api/data-liste/${currentIndicatorId}/items/${editingItem._id}`,
+          `/api/data-liste/${currentIndicatorId}/items/${identifier}`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -132,6 +135,7 @@ export default function DataQualitativeTab() {
           alert("Item LMMA modifié avec succès !");
           setIsItemModalOpen(false);
           setEditingItem(null);
+          setEditingItemIndex(-1);
           setCurrentIndicatorId("");
           setSelectedLMMAs([]);
 
@@ -231,17 +235,18 @@ export default function DataQualitativeTab() {
     }
   };
 
-  const handleDeleteItem = async (indicatorId: string, itemId: string) => {
+  const handleDeleteItem = async (
+    indicatorId: string,
+    itemId: string | undefined,
+    itemIndex: number
+  ) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet item ?")) return;
 
-    if (!itemId) {
-      alert("ID de l'item manquant");
-      return;
-    }
-
     try {
+      // Use itemId if available (new items), otherwise use index (old items)
+      const identifier = itemId || `index-${itemIndex}`;
       const res = await fetch(
-        `/api/data-liste/${indicatorId}/items/${itemId}`,
+        `/api/data-liste/${indicatorId}/items/${identifier}`,
         {
           method: "DELETE",
         }
@@ -267,9 +272,14 @@ export default function DataQualitativeTab() {
     setIsItemModalOpen(true);
   };
 
-  const openEditItemModal = (indicatorId: string, item: unknown) => {
+  const openEditItemModal = (
+    indicatorId: string,
+    item: unknown,
+    itemIndex: number
+  ) => {
     setCurrentIndicatorId(indicatorId);
     setEditingItem(item);
+    setEditingItemIndex(itemIndex);
     setIsItemModalOpen(true);
   };
 
@@ -461,7 +471,9 @@ export default function DataQualitativeTab() {
                         </div>
                         <div className="flex gap-1">
                           <button
-                            onClick={() => openEditItemModal(item._id, lmma)}
+                            onClick={() =>
+                              openEditItemModal(item._id, lmma, idx)
+                            }
                             className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
                             title="Modifier"
                           >
@@ -469,7 +481,7 @@ export default function DataQualitativeTab() {
                           </button>
                           <button
                             onClick={() =>
-                              handleDeleteItem(item._id, lmma._id || "")
+                              handleDeleteItem(item._id, lmma._id, idx)
                             }
                             className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                             title="Supprimer"
@@ -615,6 +627,7 @@ export default function DataQualitativeTab() {
                 onClick={() => {
                   setIsItemModalOpen(false);
                   setEditingItem(null);
+                  setEditingItemIndex(-1);
                   setCurrentIndicatorId("");
                   setSelectedLMMAs([]);
                 }}
@@ -842,6 +855,7 @@ export default function DataQualitativeTab() {
                   onClick={() => {
                     setIsItemModalOpen(false);
                     setEditingItem(null);
+                    setEditingItemIndex(-1);
                     setCurrentIndicatorId("");
                     setSelectedLMMAs([]);
                   }}
