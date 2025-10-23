@@ -115,10 +115,9 @@ export default function DataQualitativeTab() {
       }
 
       try {
-        // Use _id if available, otherwise use index
-        const identifier = editingItem._id || `index-${editingItemIndex}`;
+        // Always use index for consistency
         const res = await fetch(
-          `/api/data-liste/${currentIndicatorId}/items/${identifier}`,
+          `/api/data-liste/${currentIndicatorId}/items/index-${editingItemIndex}`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -235,18 +234,13 @@ export default function DataQualitativeTab() {
     }
   };
 
-  const handleDeleteItem = async (
-    indicatorId: string,
-    itemId: string | undefined,
-    itemIndex: number
-  ) => {
+  const handleDeleteItem = async (indicatorId: string, itemIndex: number) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet item ?")) return;
 
     try {
-      // Use itemId if available (new items), otherwise use index (old items)
-      const identifier = itemId || `index-${itemIndex}`;
+      // Always use index for consistency
       const res = await fetch(
-        `/api/data-liste/${indicatorId}/items/${identifier}`,
+        `/api/data-liste/${indicatorId}/items/index-${itemIndex}`,
         {
           method: "DELETE",
         }
@@ -485,9 +479,7 @@ export default function DataQualitativeTab() {
                               <Edit2 className="w-3 h-3" />
                             </button>
                             <button
-                              onClick={() =>
-                                handleDeleteItem(item._id, lmma._id, idx)
-                              }
+                              onClick={() => handleDeleteItem(item._id, idx)}
                               className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                               title="Supprimer"
                             >
