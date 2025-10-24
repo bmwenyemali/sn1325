@@ -21,8 +21,8 @@ export default function ConfigurationPage() {
     appName: "SN1325 - Système National de Suivi",
     appDescription:
       "Système national de suivi de la résolution 1325 du Conseil de Sécurité des Nations Unies",
-    supportEmail: "support@sn1325.bi",
-    supportPhone: "+257 22 XX XX XX",
+    supportEmail: "support@akiligroup.com",
+    supportPhone: "+243825640564",
     maxUploadSize: 5,
     defaultLanguage: "fr",
     enableNotifications: true,
@@ -177,7 +177,7 @@ export default function ConfigurationPage() {
                 >
                   <option value="fr">Français</option>
                   <option value="en">English</option>
-                  <option value="rn">Kirundi</option>
+                  <option value="rn">Lingala</option>
                 </select>
               </div>
             </div>

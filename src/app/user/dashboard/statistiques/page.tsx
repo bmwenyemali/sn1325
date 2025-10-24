@@ -82,7 +82,7 @@ export default function UserStatistiquesPage() {
       totalQualitativeData: lmmaData.length,
       totalLMMA,
       totalIndicators: indicateurs.length,
-      totalProvinces: provinces.length,
+      totalProvinces: provinces.length - 1, // Exclude "National" province
     };
   }, [numericData, qualitativeData, indicateurs, provinces]);
 

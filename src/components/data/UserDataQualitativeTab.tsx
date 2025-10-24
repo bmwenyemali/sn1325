@@ -186,45 +186,47 @@ export default function UserDataQualitativeTab() {
                   Lois, Mesures & Actions
                 </h4>
                 <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
-                  {item.items.slice(0, 3).map(
-                    (
-                      lmma: {
-                        loisMesuresActions:
-                          | {
-                              _id: string;
-                              nom?: string;
-                              titre?: string;
-                              type: { nom: string } | string;
-                            }
-                          | string;
-                        annee: number;
-                        ordre?: number;
-                      },
-                      idx: number
-                    ) => {
-                      const lmmaObj =
-                        typeof lmma.loisMesuresActions === "object"
-                          ? lmma.loisMesuresActions
-                          : null;
-                      const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
-                      const typeName =
-                        typeof lmmaObj?.type === "object"
-                          ? lmmaObj.type.nom
-                          : lmmaObj?.type || "N/A";
+                  {[...item.items]
+                    .sort((a, b) => a.annee - b.annee)
+                    .slice(0, 3)
+                    .map(
+                      (
+                        lmma: {
+                          loisMesuresActions:
+                            | {
+                                _id: string;
+                                nom?: string;
+                                titre?: string;
+                                type: { nom: string } | string;
+                              }
+                            | string;
+                          annee: number;
+                          ordre?: number;
+                        },
+                        idx: number
+                      ) => {
+                        const lmmaObj =
+                          typeof lmma.loisMesuresActions === "object"
+                            ? lmma.loisMesuresActions
+                            : null;
+                        const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+                        const typeName =
+                          typeof lmmaObj?.type === "object"
+                            ? lmmaObj.type.nom
+                            : lmmaObj?.type || "N/A";
 
-                      return (
-                        <li key={idx} className="pl-2">
-                          <span className="font-medium">
-                            {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                            {lmmaNom}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                            ({typeName}, {lmma.annee})
-                          </span>
-                        </li>
-                      );
-                    }
-                  )}
+                        return (
+                          <li key={idx} className="pl-2">
+                            <span className="font-medium">
+                              {idx + 1}. {lmmaNom}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                              ({typeName}, {lmma.annee})
+                            </span>
+                          </li>
+                        );
+                      }
+                    )}
                 </ul>
               </div>
             )}
@@ -300,71 +302,74 @@ export default function UserDataQualitativeTab() {
                   LOIS, MESURES & ACTIONS ({selectedData.items?.length || 0})
                 </h3>
                 <div className="space-y-3">
-                  {selectedData.items?.map(
-                    (
-                      lmma: {
-                        loisMesuresActions:
-                          | {
-                              _id: string;
-                              nom?: string;
-                              titre?: string;
-                              type: { nom: string } | string;
-                              description?: string;
-                              reference?: string;
-                            }
-                          | string;
-                        annee: number;
-                        ordre?: number;
-                        notes?: string;
-                      },
-                      idx: number
-                    ) => {
-                      const lmmaObj =
-                        typeof lmma.loisMesuresActions === "object"
-                          ? lmma.loisMesuresActions
-                          : null;
-                      const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
-                      const typeName =
-                        typeof lmmaObj?.type === "object"
-                          ? lmmaObj.type.nom
-                          : lmmaObj?.type || "N/A";
+                  {[...selectedData.items]
+                    .sort((a, b) => a.annee - b.annee)
+                    .map(
+                      (
+                        lmma: {
+                          loisMesuresActions:
+                            | {
+                                _id: string;
+                                nom?: string;
+                                titre?: string;
+                                type: { nom: string } | string;
+                                description?: string;
+                                reference?: string;
+                              }
+                            | string;
+                          annee: number;
+                          ordre?: number;
+                          notes?: string;
+                        },
+                        idx: number
+                      ) => {
+                        const lmmaObj =
+                          typeof lmma.loisMesuresActions === "object"
+                            ? lmma.loisMesuresActions
+                            : null;
+                        const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+                        const typeName =
+                          typeof lmmaObj?.type === "object"
+                            ? lmmaObj.type.nom
+                            : lmmaObj?.type || "N/A";
 
-                      return (
-                        <div
-                          key={idx}
-                          className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                                {lmmaNom}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                <span className="font-medium">{typeName}</span>{" "}
-                                - {lmma.annee}
-                              </p>
-                              {lmmaObj?.description && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                  {lmmaObj.description}
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                  {idx + 1}. {lmmaNom}
                                 </p>
-                              )}
-                              {lmmaObj?.reference && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  Réf: {lmmaObj.reference}
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  <span className="font-medium">
+                                    {typeName}
+                                  </span>{" "}
+                                  - {lmma.annee}
                                 </p>
-                              )}
-                              {lmma.notes && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
-                                  Note: {lmma.notes}
-                                </p>
-                              )}
+                                {lmmaObj?.description && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    {lmmaObj.description}
+                                  </p>
+                                )}
+                                {lmmaObj?.reference && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Réf: {lmmaObj.reference}
+                                  </p>
+                                )}
+                                {lmma.notes && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+                                    Note: {lmma.notes}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    }
-                  )}
+                        );
+                      }
+                    )}
                   {(!selectedData.items || selectedData.items.length === 0) && (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                       Aucun item LMMA

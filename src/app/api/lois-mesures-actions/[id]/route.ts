@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import { LoisMesuresActions } from "@/models";
+import { LoisMesuresActions, DataQualitative } from "@/models";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +69,33 @@ export async function DELETE(
   try {
     await dbConnect();
     const { id } = await context.params;
+
+    // Check if this LMMA is being used in any DataQualitative records
+    const usageCheck = await DataQualitative.find({
+      "items.loisMesuresActions": id,
+    })
+      .populate("indicateur")
+      .lean();
+
+    if (usageCheck && usageCheck.length > 0) {
+      const indicatorNames = usageCheck
+        .map(
+          (dq) =>
+            (dq.indicateur as { nom?: string })?.nom || "Indicateur inconnu"
+        )
+        .join(", ");
+
+      return NextResponse.json(
+        {
+          error: `Cette Loi/Mesure/Action est actuellement utilisée dans ${usageCheck.length} indicateur(s) (${indicatorNames}). Veuillez d'abord la supprimer de ces indicateurs dans "Données Qualitatives (LMMA)" avant de la supprimer de la table de référence.`,
+          usedIn: usageCheck.map((dq) => ({
+            indicatorId: (dq.indicateur as { _id?: string })?._id,
+            indicatorName: (dq.indicateur as { nom?: string })?.nom,
+          })),
+        },
+        { status: 409 } // Conflict
+      );
+    }
 
     const lma = await LoisMesuresActions.findByIdAndDelete(id);
 

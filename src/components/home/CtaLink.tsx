@@ -26,7 +26,7 @@ export default function CtaLink() {
       className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full text-lg font-bold
                  bg-transparent border-2 border-white dark:border-white 
                  text-white dark:text-white
-                 hover:bg-white hover:text-bleu-rdc dark:hover:bg-white dark:hover:text-bleu-rdc
+                 hover:bg-yellow-500 hover:text-bleu-rdc dark:hover:bg-white dark:hover:text-bleu-rdc
                  transition-all duration-300 ease-in-out
                  hover:scale-105 hover:shadow-2xl
                  animate-pulse-subtle"

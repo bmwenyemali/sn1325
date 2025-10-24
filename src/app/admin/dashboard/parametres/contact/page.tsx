@@ -6,18 +6,18 @@ import { Phone, Save, Mail, MapPin, Globe, Clock } from "lucide-react";
 export default function ContactPage() {
   const [saving, setSaving] = useState(false);
   const [contact, setContact] = useState({
-    organizationName: "Ministère de la Justice - Burundi",
-    address: "Avenue de la Justice, Bujumbura, Burundi",
-    email: "contact@justice.gov.bi",
-    phone: "+257 22 XX XX XX",
-    fax: "+257 22 XX XX XX",
-    website: "https://www.justice.gov.bi",
+    organizationName: "SN1325 - Secrétariat National 1325",
+    address: "Gombe, kinshasa, RDC",
+    email: "contact@sn1325.cd",
+    phone: "+243 825 640 564",
+    fax: "+243 825640564",
+    website: "https://www.sn1325.cd",
     openingHours: "Lundi - Vendredi: 8h00 - 17h00",
-    emergencyContact: "+257 XX XX XX XX",
+    emergencyContact: "+243 825 640 564",
     socialMedia: {
-      facebook: "https://facebook.com/ministere.justice.bi",
-      twitter: "https://twitter.com/justice_bi",
-      linkedin: "https://linkedin.com/company/ministere-justice-burundi",
+      facebook: "https://facebook.com/sn1325",
+      twitter: "https://twitter.com/sn1325_rdc",
+      linkedin: "https://linkedin.com/company/sn1325",
     },
   });
 

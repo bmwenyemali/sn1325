@@ -36,7 +36,7 @@ export default function HomePage() {
             Secrétariat National 1325
           </h1>
           <p className="text-lg md:text-xl text-white/90 dark:text-blue-100 max-w-3xl mx-auto leading-relaxed mb-8 animate-fade-in">
-            Application de monitoring et de suivi de la mise en œuvre de la
+            Base de données de monitoring et de suivi de la mise en œuvre de la
             Résolution 1325 du Conseil de Sécurité des Nations Unies sur les
             Femmes, la Paix et la Sécurité en République Démocratique du Congo.
           </p>
@@ -65,7 +65,7 @@ export default function HomePage() {
           <StatCard
             icon={<Shield className="w-8 h-8 text-white" />}
             title="Axes Stratégiques"
-            value="5"
+            value="6"
             description="Piliers du plan d'action"
             gradient="from-green-500 to-green-600"
           />
