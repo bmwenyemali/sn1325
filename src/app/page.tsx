@@ -72,14 +72,14 @@ export default function HomePage() {
           <StatCard
             icon={<BarChart className="w-8 h-8 text-white" />}
             title="Indicateurs Suivis"
-            value="75+"
+            value="40+"
             description="Mesure de l'impact"
             gradient="from-orange-500 to-orange-600"
           />
           <StatCard
             icon={<CheckCircle className="w-8 h-8 text-white" />}
             title="Rapports Générés"
-            value="120+"
+            value="50+"
             description="Analyses et évaluations"
             gradient="from-red-500 to-red-600"
           />

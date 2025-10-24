@@ -68,7 +68,7 @@ export default function UserDashboardPage() {
     },
     {
       name: "Provinces Couvertes",
-      value: provinces.length.toString(),
+      value: (provinces.length - 1).toString(),
       icon: Globe,
       color: "bg-orange-500",
     },
