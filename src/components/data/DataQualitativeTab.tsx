@@ -183,14 +183,36 @@ export default function DataQualitativeTab() {
       );
 
       const failed = [] as number[];
+      const failedDetails = [] as string[];
+
       for (let i = 0; i < responses.length; i++) {
-        if (!responses[i].ok) failed.push(i);
+        if (!responses[i].ok) {
+          failed.push(i);
+          try {
+            const errorData = await responses[i].json();
+            failedDetails.push(errorData.error || "Erreur inconnue");
+          } catch {
+            failedDetails.push("Erreur de réponse");
+          }
+        }
       }
 
       if (failed.length > 0) {
-        alert(
-          `Certains items n'ont pas pu être ajoutés (${failed.length}/${items.length}). Réessayez pour ces éléments.`
-        );
+        if (failed.length === items.length) {
+          // All failed
+          alert(
+            `Aucun item n'a pu être ajouté. Erreur: ${
+              failedDetails[0] || "Erreur inconnue"
+            }`
+          );
+        } else {
+          // Some succeeded
+          alert(
+            `${items.length - failed.length} item(s) ajouté(s), mais ${
+              failed.length
+            } ont échoué. Erreur: ${failedDetails[0] || "Erreur inconnue"}`
+          );
+        }
       } else {
         alert(`${selectedLMMAIds.length} item(s) LMMA ajouté(s) avec succès !`);
       }
@@ -263,6 +285,23 @@ export default function DataQualitativeTab() {
   const openAddItemModal = (indicatorId: string) => {
     setCurrentIndicatorId(indicatorId);
     setEditingItem(null);
+    setEditingItemIndex(-1);
+
+    // Preselect already added LMMAs to prevent duplicates
+    const indicator = qualitativeData?.find((d) => d._id === indicatorId);
+    if (indicator && indicator.items) {
+      const existingLmmaIds = indicator.items
+        .map((item: { loisMesuresActions: string | { _id: string } }) =>
+          typeof item.loisMesuresActions === "object"
+            ? item.loisMesuresActions._id
+            : item.loisMesuresActions
+        )
+        .filter(Boolean);
+      setSelectedLMMAs(existingLmmaIds);
+    } else {
+      setSelectedLMMAs([]);
+    }
+
     setIsItemModalOpen(true);
   };
 
@@ -424,72 +463,95 @@ export default function DataQualitativeTab() {
                   Lois, Mesures & Actions ({item.items.length})
                 </h4>
                 <div className="space-y-2">
-                  {item.items.map(
-                    (
-                      lmma: {
-                        loisMesuresActions:
-                          | {
-                              _id: string;
-                              nom?: string;
-                              titre?: string;
-                              type: { nom: string } | string;
-                            }
-                          | string;
-                        annee: number;
-                        _id?: string;
-                      },
-                      idx: number
-                    ) => {
-                      // Only show first 3 items in the preview
-                      if (idx >= 3) return null;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {typeof lmma.loisMesuresActions === "object"
-                                ? lmma.loisMesuresActions.nom ||
-                                  lmma.loisMesuresActions.titre ||
-                                  "N/A"
-                                : "N/A"}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {typeof lmma.loisMesuresActions === "object" &&
-                              typeof lmma.loisMesuresActions.type === "object"
-                                ? lmma.loisMesuresActions.type.nom
-                                : typeof lmma.loisMesuresActions === "object" &&
-                                  typeof lmma.loisMesuresActions.type ===
-                                    "string"
-                                ? lmma.loisMesuresActions.type
-                                : "N/A"}{" "}
-                              - {lmma.annee}
-                            </p>
-                          </div>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() =>
-                                openEditItemModal(item._id, lmma, idx)
+                  {[...item.items]
+                    .sort(
+                      (a: { annee: number }, b: { annee: number }) =>
+                        a.annee - b.annee
+                    )
+                    .map(
+                      (
+                        lmma: {
+                          loisMesuresActions:
+                            | {
+                                _id: string;
+                                nom?: string;
+                                titre?: string;
+                                type: { nom: string } | string;
                               }
-                              className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                              title="Modifier"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteItem(item._id, idx)}
-                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
+                            | string;
+                          annee: number;
+                          _id?: string;
+                        },
+                        sortedIdx: number
+                      ) => {
+                        // Only show first 3 items in the preview
+                        if (sortedIdx >= 3) return null;
+
+                        // Find the real index in the original unsorted array
+                        const realIdx = item.items.findIndex(
+                          (i: {
+                            loisMesuresActions: string | { _id: string };
+                            annee: number;
+                          }) =>
+                            (typeof i.loisMesuresActions === "object" &&
+                            typeof lmma.loisMesuresActions === "object"
+                              ? i.loisMesuresActions._id ===
+                                lmma.loisMesuresActions._id
+                              : i.loisMesuresActions ===
+                                lmma.loisMesuresActions) &&
+                            i.annee === lmma.annee
+                        );
+
+                        return (
+                          <div
+                            key={sortedIdx}
+                            className="flex items-center justify-between bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
+                          >
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {typeof lmma.loisMesuresActions === "object"
+                                  ? lmma.loisMesuresActions.nom ||
+                                    lmma.loisMesuresActions.titre ||
+                                    "N/A"
+                                  : "N/A"}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {typeof lmma.loisMesuresActions === "object" &&
+                                typeof lmma.loisMesuresActions.type === "object"
+                                  ? lmma.loisMesuresActions.type.nom
+                                  : typeof lmma.loisMesuresActions ===
+                                      "object" &&
+                                    typeof lmma.loisMesuresActions.type ===
+                                      "string"
+                                  ? lmma.loisMesuresActions.type
+                                  : "N/A"}{" "}
+                                - {lmma.annee}
+                              </p>
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() =>
+                                  openEditItemModal(item._id, lmma, realIdx)
+                                }
+                                className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                                title="Modifier"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteItem(item._id, realIdx)
+                                }
+                                className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                  )}
+                        );
+                      }
+                    )}
                   {item.items.length > 3 && (
                     <button
                       onClick={() => {
@@ -932,58 +994,91 @@ export default function DataQualitativeTab() {
                   LOIS, MESURES & ACTIONS ({selectedData.items?.length || 0})
                 </h3>
                 <div className="space-y-3">
-                  {selectedData.items?.map(
-                    (
-                      lmma: {
-                        loisMesuresActions:
-                          | {
-                              nom?: string;
-                              titre?: string;
-                              type: { nom: string } | string;
-                            }
-                          | string;
-                        annee: number;
-                        ordre?: number;
-                        notes?: string;
-                      },
-                      idx: number
-                    ) => {
-                      const lmmaObj =
-                        typeof lmma.loisMesuresActions === "object"
-                          ? lmma.loisMesuresActions
-                          : null;
-                      const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
-                      const typeName =
-                        typeof lmmaObj?.type === "object"
-                          ? lmmaObj.type.nom
-                          : lmmaObj?.type || "N/A";
+                  {selectedData.items
+                    ?.sort(
+                      (a: { annee: number }, b: { annee: number }) =>
+                        a.annee - b.annee
+                    )
+                    ?.map(
+                      (
+                        lmma: {
+                          loisMesuresActions:
+                            | {
+                                nom?: string;
+                                titre?: string;
+                                type: { nom: string } | string;
+                              }
+                            | string;
+                          annee: number;
+                          ordre?: number;
+                          notes?: string;
+                        },
+                        idx: number
+                      ) => {
+                        const lmmaObj =
+                          typeof lmma.loisMesuresActions === "object"
+                            ? lmma.loisMesuresActions
+                            : null;
+                        const lmmaNom = lmmaObj?.nom || lmmaObj?.titre || "N/A";
+                        const typeName =
+                          typeof lmmaObj?.type === "object"
+                            ? lmmaObj.type.nom
+                            : lmmaObj?.type || "N/A";
 
-                      return (
-                        <div
-                          key={idx}
-                          className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {lmma.ordre ? `${lmma.ordre}. ` : ""}
-                                {lmmaNom}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                <span className="font-medium">{typeName}</span>{" "}
-                                - {lmma.annee}
-                              </p>
-                              {lmma.notes && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                  {lmma.notes}
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                  {lmma.ordre ? `${lmma.ordre}. ` : ""}
+                                  {lmmaNom}
                                 </p>
-                              )}
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  <span className="font-medium">
+                                    {typeName}
+                                  </span>{" "}
+                                  - {lmma.annee}
+                                </p>
+                                {lmma.notes && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    {lmma.notes}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex gap-1 ml-4">
+                                <button
+                                  onClick={() => {
+                                    openEditItemModal(
+                                      selectedData._id,
+                                      lmma,
+                                      idx
+                                    );
+                                    setIsDetailModalOpen(false);
+                                  }}
+                                  className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                  title="Modifier"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setIsDetailModalOpen(false);
+                                    handleDeleteItem(selectedData._id, idx);
+                                  }}
+                                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    }
-                  )}
+                        );
+                      }
+                    )}
                   {(!selectedData.items || selectedData.items.length === 0) && (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                       Aucun item LMMA
