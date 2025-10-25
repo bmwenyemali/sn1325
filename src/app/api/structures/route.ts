@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
       .populate("provinces", "nom code")
       .populate("axes", "nom numero")
       .populate("cible", "nom numero")
-      .sort({ nom: 1 });
+      .sort({ nom: 1 })
+      .lean(); // Add lean() for better performance
 
     return NextResponse.json({ success: true, data: structures });
   } catch (error) {

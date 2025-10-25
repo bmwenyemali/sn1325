@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     if (annee) query.annee = parseInt(annee);
 
     const loisMesuresActions = await LoisMesuresActions.find(query)
-      .populate("type")
+      .populate("type", "nom") // Only fetch type name
       .sort({ annee: -1, nom: 1 })
-      .lean();
+      .lean(); // Already has lean(), good!
 
     return NextResponse.json(loisMesuresActions);
   } catch (error) {

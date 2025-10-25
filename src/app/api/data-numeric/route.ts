@@ -32,11 +32,13 @@ export async function GET(request: NextRequest) {
     if (provinceId) query.province = provinceId;
     if (sexe) query.sexe = sexe;
 
+    // Optimized query with lean() and selective field projection
     const dataNumeric = await DataNumeric.find(query)
-      .populate("indicateur")
-      .populate("province")
-      .populate("cible")
-      .sort({ annee: -1, createdAt: -1 });
+      .populate("indicateur", "nom code type unite axe") // Only fetch needed fields
+      .populate("province", "nom code")
+      .populate("cible", "nom numero")
+      .sort({ annee: -1, createdAt: -1 })
+      .lean(); // Return plain JS objects instead of Mongoose documents
 
     return NextResponse.json({ success: true, data: dataNumeric });
   } catch (error) {

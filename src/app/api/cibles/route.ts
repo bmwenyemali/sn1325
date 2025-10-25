@@ -29,9 +29,10 @@ export async function GET(request: NextRequest) {
     if (grandeCategorieId) query.grandeCategorie = grandeCategorieId;
 
     const cibles = await Cible.find(query)
-      .populate("categorie")
-      .populate("grandeCategorie")
-      .sort({ ordre: 1, nom: 1 });
+      .populate("categorie", "nom") // Only fetch name
+      .populate("grandeCategorie", "nom") // Only fetch name
+      .sort({ ordre: 1, nom: 1 })
+      .lean();
 
     return NextResponse.json({ success: true, data: cibles });
   } catch (error) {

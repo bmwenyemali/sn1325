@@ -26,15 +26,19 @@ export async function GET(request: NextRequest) {
     const query: Record<string, unknown> = {};
     if (indicateurId) query.indicateur = indicateurId;
 
+    // Optimized nested populate with field projection and lean()
     const dataQualitative = await DataQualitative.find(query)
-      .populate("indicateur")
+      .populate("indicateur", "nom code type") // Only needed fields
       .populate({
         path: "items.loisMesuresActions",
+        select: "nom titre annee reference description", // Select specific fields
         populate: {
           path: "type",
+          select: "nom", // Only type name
         },
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Return plain objects for faster serialization
 
     return NextResponse.json({ success: true, data: dataQualitative });
   } catch (error) {

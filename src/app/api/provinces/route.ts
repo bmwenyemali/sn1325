@@ -15,7 +15,9 @@ export async function GET(request: NextRequest) {
     let query = {};
     if (region) query = { region };
 
-    const provinces = await Province.find(query).sort({ ordre: 1, nom: 1 });
+    const provinces = await Province.find(query)
+      .sort({ ordre: 1, nom: 1 })
+      .lean();
 
     return NextResponse.json({ success: true, data: provinces });
   } catch (error) {

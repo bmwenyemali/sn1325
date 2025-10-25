@@ -20,9 +20,11 @@ export async function GET(request: NextRequest) {
     if (axeId) query = { ...query, axe: axeId };
     if (type) query = { ...query, type };
 
+    // Optimized with lean() and field projection
     const indicateurs = await Indicateur.find(query)
-      .populate("axe")
-      .sort({ ordre: 1 });
+      .populate("axe", "nom numero") // Only fetch axe name and number
+      .sort({ ordre: 1 })
+      .lean(); // Return plain objects
 
     return NextResponse.json({ success: true, data: indicateurs });
   } catch (error) {

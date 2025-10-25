@@ -10,7 +10,7 @@ export const revalidate = 30;
 export async function GET() {
   try {
     await connectDB();
-    const axes = await Axe.find().sort({ ordre: 1 });
+    const axes = await Axe.find().sort({ ordre: 1 }).lean();
     return NextResponse.json({ success: true, data: axes });
   } catch (error) {
     console.error("Erreur GET /api/axes:", error);
