@@ -126,22 +126,37 @@ export default function UserStatistiquesPage() {
     return Object.values(yearCounts).sort((a, b) => a.annee - b.annee);
   }, [numericData, qualitativeData]);
 
-  // Data by gender
+  // Data by gender - Sum of values by gender
   const dataByGender = useMemo(() => {
-    const genderCounts: Record<string, number> = {
+    const genderSums: Record<string, number> = {
       Homme: 0,
       Femme: 0,
-      Total: 0,
     };
 
     (numericData || []).forEach((item) => {
-      const sexe = item.sexe || "Total";
-      genderCounts[sexe] = (genderCounts[sexe] || 0) + 1;
+      if (item.sexe === "Homme") {
+        genderSums.Homme += item.valeur || 0;
+      } else if (item.sexe === "Femme") {
+        genderSums.Femme += item.valeur || 0;
+      }
     });
 
-    return Object.entries(genderCounts)
-      .filter(([, value]) => value > 0)
-      .map(([name, value]) => ({ name, value }));
+    const total = genderSums.Homme + genderSums.Femme;
+
+    return [
+      {
+        name: "Hommes",
+        valeur: genderSums.Homme,
+        pourcentage:
+          total > 0 ? ((genderSums.Homme / total) * 100).toFixed(1) : 0,
+      },
+      {
+        name: "Femmes",
+        valeur: genderSums.Femme,
+        pourcentage:
+          total > 0 ? ((genderSums.Femme / total) * 100).toFixed(1) : 0,
+      },
+    ];
   }, [numericData]);
 
   // Data by province (top 10)
@@ -161,7 +176,7 @@ export default function UserStatistiquesPage() {
       .slice(0, 10);
   }, [numericData]);
 
-  // Data by axe
+  // Data by axe - count of data entries per axe
   const dataByAxe = useMemo(() => {
     const axeCounts: Record<
       string,
@@ -170,7 +185,7 @@ export default function UserStatistiquesPage() {
 
     axes.forEach((axe) => {
       axeCounts[axe._id] = {
-        name: `Axe ${axe.numero}`,
+        name: `Axe ${axe.numero}: ${axe.nom}`,
         numero: axe.numero,
         indicateurs: 0,
         donnees: 0,
@@ -203,10 +218,17 @@ export default function UserStatistiquesPage() {
     const typeCounts: Record<string, number> = {};
 
     (qualitativeData || []).forEach((item) => {
-      item.items?.forEach((lmma: { loisMesuresActions: { type: string } }) => {
-        const type = lmma.loisMesuresActions.type;
-        typeCounts[type] = (typeCounts[type] || 0) + 1;
-      });
+      item.items?.forEach(
+        (lmma: { loisMesuresActions: { type: { nom: string } | string } }) => {
+          let typeName = "Non spécifié";
+          if (typeof lmma.loisMesuresActions.type === "object") {
+            typeName = lmma.loisMesuresActions.type.nom;
+          } else if (typeof lmma.loisMesuresActions.type === "string") {
+            typeName = lmma.loisMesuresActions.type;
+          }
+          typeCounts[typeName] = (typeCounts[typeName] || 0) + 1;
+        }
+      );
     });
 
     return Object.entries(typeCounts)
@@ -331,8 +353,10 @@ export default function UserStatistiquesPage() {
                 cy="50%"
                 outerRadius={120}
                 fill="#8884d8"
-                dataKey="value"
-                label
+                dataKey="valeur"
+                label={(entry) =>
+                  `${entry.name}: ${entry.valeur} (${entry.pourcentage}%)`
+                }
               >
                 {dataByGender.map((entry, index) => (
                   <Cell
@@ -341,7 +365,12 @@ export default function UserStatistiquesPage() {
                   />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip
+                formatter={(value: number, name: string, props) => [
+                  `${value} (${props.payload.pourcentage}%)`,
+                  name,
+                ]}
+              />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

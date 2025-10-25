@@ -27,6 +27,13 @@ interface Structure {
   photo?: string;
   axes?: Array<{ _id: string; nom: string; numero: number }>;
   provinces?: Array<{ _id: string; nom: string }>;
+  cible?: Array<{ _id: string; nom: string }>;
+  aPropos?: string;
+  pointFocal?: string;
+  adresse?: string;
+  telephonePrive?: string;
+  emailPrive?: string;
+  isNational?: boolean;
 }
 
 export default function UserStructuresPage() {
@@ -215,6 +222,11 @@ export default function UserStructuresPage() {
                   <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold rounded-full">
                     {selectedStructure.type}
                   </span>
+                  {selectedStructure.isNational && (
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm font-semibold rounded-full">
+                      National
+                    </span>
+                  )}
                 </div>
 
                 {selectedStructure.description && (
@@ -228,7 +240,43 @@ export default function UserStructuresPage() {
                   </div>
                 )}
 
+                {selectedStructure.aPropos && (
+                  <div className="pt-4 border-t dark:border-slate-700">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                      À Propos
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {selectedStructure.aPropos}
+                    </p>
+                  </div>
+                )}
+
+                {selectedStructure.pointFocal && (
+                  <div className="pt-4 border-t dark:border-slate-700">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                      Point Focal
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {selectedStructure.pointFocal}
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t dark:border-slate-700">
+                  {selectedStructure.adresse && (
+                    <div className="flex items-start gap-3 md:col-span-2">
+                      <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Adresse
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {selectedStructure.adresse}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {selectedStructure.province && (
                     <div className="flex items-start gap-3">
                       <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
@@ -248,7 +296,7 @@ export default function UserStructuresPage() {
                       <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          Email
+                          Email Organisation
                         </p>
                         <a
                           href={`mailto:${selectedStructure.email}`}
@@ -260,18 +308,52 @@ export default function UserStructuresPage() {
                     </div>
                   )}
 
+                  {selectedStructure.emailPrive && (
+                    <div className="flex items-start gap-3">
+                      <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Email Privé
+                        </p>
+                        <a
+                          href={`mailto:${selectedStructure.emailPrive}`}
+                          className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
+                        >
+                          {selectedStructure.emailPrive}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
                   {selectedStructure.telephone && (
                     <div className="flex items-start gap-3">
                       <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          Téléphone
+                          Téléphone Organisation
                         </p>
                         <a
                           href={`tel:${selectedStructure.telephone}`}
                           className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
                         >
                           {selectedStructure.telephone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedStructure.telephonePrive && (
+                    <div className="flex items-start gap-3">
+                      <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Téléphone Privé
+                        </p>
+                        <a
+                          href={`tel:${selectedStructure.telephonePrive}`}
+                          className="text-sm text-bleu-rdc dark:text-jaune-rdc hover:underline"
+                        >
+                          {selectedStructure.telephonePrive}
                         </a>
                       </div>
                     </div>
@@ -301,6 +383,25 @@ export default function UserStructuresPage() {
                   )}
                 </div>
 
+                {selectedStructure.provinces &&
+                  selectedStructure.provinces.length > 0 && (
+                    <div className="pt-4 border-t dark:border-slate-700">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                        Provinces Couvertes
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedStructure.provinces.map((province) => (
+                          <span
+                            key={province._id}
+                            className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm rounded-full"
+                          >
+                            {province.nom}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                 {selectedStructure.axes &&
                   selectedStructure.axes.length > 0 && (
                     <div className="pt-4 border-t dark:border-slate-700">
@@ -314,6 +415,25 @@ export default function UserStructuresPage() {
                             className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 text-sm rounded-full"
                           >
                             Axe {axe.numero}: {axe.nom}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {selectedStructure.cible &&
+                  selectedStructure.cible.length > 0 && (
+                    <div className="pt-4 border-t dark:border-slate-700">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                        Cibles
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedStructure.cible.map((cible) => (
+                          <span
+                            key={cible._id}
+                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-sm rounded-full"
+                          >
+                            {cible.nom}
                           </span>
                         ))}
                       </div>

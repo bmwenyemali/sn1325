@@ -10,7 +10,12 @@ import {
   BarChart3,
   Activity,
 } from "lucide-react";
-import { useIndicateurs, useDataNumeric, useAxes } from "@/hooks/useApi";
+import {
+  useIndicateurs,
+  useDataNumeric,
+  useAxes,
+  useCibles,
+} from "@/hooks/useApi";
 import {
   BarChart,
   Bar,
@@ -47,17 +52,22 @@ interface Indicateur {
   axe: { _id: string; nom: string; numero: number };
   desagregableParSexe?: boolean;
   desagregableParProvince?: boolean;
+  avecCible?: boolean;
 }
 
 export default function AnalysesPage() {
   const [selectedIndicatorId, setSelectedIndicatorId] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedCibleId, setSelectedCibleId] = useState<string>("");
 
   const { data: indicateursData } = useIndicateurs();
   const { data: numericData } = useDataNumeric();
   const { data: axesData } = useAxes();
+  const { data: ciblesData } = useCibles();
 
   const indicateurs = (indicateursData as Indicateur[]) || [];
   const axes = axesData || [];
+  const cibles = ciblesData || [];
 
   // Filter to show only quantitative indicators
   const quantitativeIndicators = indicateurs.filter(
@@ -70,13 +80,50 @@ export default function AnalysesPage() {
     [indicateurs, selectedIndicatorId]
   );
 
-  // Filter data for selected indicator
+  // Get available years for selected indicator
+  const availableYears = useMemo(() => {
+    if (!selectedIndicatorId || !numericData) return [];
+    const years = new Set(
+      (numericData as NumericDataItem[])
+        .filter((item) => item.indicateur._id === selectedIndicatorId)
+        .map((item) => item.annee)
+    );
+    return Array.from(years).sort((a, b) => b - a);
+  }, [selectedIndicatorId, numericData]);
+
+  // Get available cibles for selected indicator
+  const availableCibles = useMemo(() => {
+    if (!selectedIndicatorId || !numericData) return [];
+    const cibleIds = new Set(
+      (numericData as NumericDataItem[])
+        .filter(
+          (item) =>
+            item.indicateur._id === selectedIndicatorId && item.cible?._id
+        )
+        .map((item) => item.cible!._id)
+    );
+    return cibles.filter((c: { _id: string }) => cibleIds.has(c._id));
+  }, [selectedIndicatorId, numericData, cibles]);
+
+  // Filter data for selected indicator with year and cible filters
   const indicatorData = useMemo(() => {
     if (!selectedIndicatorId || !numericData) return [];
-    return (numericData as NumericDataItem[]).filter(
+    let filtered = (numericData as NumericDataItem[]).filter(
       (item) => item.indicateur._id === selectedIndicatorId
     );
-  }, [selectedIndicatorId, numericData]);
+
+    if (selectedYear) {
+      filtered = filtered.filter(
+        (item) => item.annee === parseInt(selectedYear)
+      );
+    }
+
+    if (selectedCibleId && selectedCibleId !== "all") {
+      filtered = filtered.filter((item) => item.cible?._id === selectedCibleId);
+    }
+
+    return filtered;
+  }, [selectedIndicatorId, numericData, selectedYear, selectedCibleId]);
 
   // Analysis: Temporal evolution (by year)
   const temporalData = useMemo(() => {
@@ -257,6 +304,59 @@ export default function AnalysesPage() {
               );
             })}
         </select>
+
+        {/* Year and Cible Filters (show when indicator is selected) */}
+        {selectedIndicatorId && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {/* Year Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Calendar className="w-4 h-4 inline mr-2" />
+                Filtrer par Année
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => {
+                  setSelectedYear(e.target.value);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-bleu-rdc"
+              >
+                <option value="">Toutes les années</option>
+                {availableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Cible Filter */}
+            {selectedIndicator?.avecCible && availableCibles.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Users className="w-4 h-4 inline mr-2" />
+                  Filtrer par Cible
+                </label>
+                <select
+                  value={selectedCibleId}
+                  onChange={(e) => {
+                    setSelectedCibleId(e.target.value);
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-bleu-rdc"
+                >
+                  <option value="all">Toutes les cibles</option>
+                  {availableCibles.map(
+                    (cible: { _id: string; nom: string }) => (
+                      <option key={cible._id} value={cible._id}>
+                        {cible.nom}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Show analysis when indicator is selected */}
